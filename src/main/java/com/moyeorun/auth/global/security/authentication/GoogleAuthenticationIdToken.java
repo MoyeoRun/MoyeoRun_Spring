@@ -8,7 +8,8 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 @Getter
-public class GoogleAuthenticationIdToken extends AbstractAuthenticationToken {
+public class GoogleAuthenticationIdToken extends AbstractAuthenticationToken implements
+    IdTokenAuthentication {
 
   private String idToken;
   private String email;

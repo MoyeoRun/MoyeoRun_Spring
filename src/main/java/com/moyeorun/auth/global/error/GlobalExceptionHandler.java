@@ -3,6 +3,7 @@ package com.moyeorun.auth.global.error;
 import com.moyeorun.auth.global.error.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -16,5 +17,14 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.status(e.getErrorCode().getStatusCode())
         .body(e.getErrorCode().getMessage());
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  private ResponseEntity<?> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException e) {
+    log.error(e.getMessage());
+
+    return ResponseEntity.status(401)
+        .body(e.getMessage());
   }
 }

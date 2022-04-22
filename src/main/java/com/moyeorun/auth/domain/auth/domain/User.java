@@ -35,10 +35,10 @@ public class User extends BaseTimeEntity {
   private String email;
 
   @Column(name = "height", nullable = false)
-  private Double height;
+  private int height;
 
   @Column(name = "weight", nullable = false)
-  private Double weight;
+  private int weight;
 
   @Column(name = "image", nullable = false)
   private String image;
@@ -58,7 +58,7 @@ public class User extends BaseTimeEntity {
   private RoleType role;
 
   @Builder
-  User(String name, String email, Double height, Double weight, String image, String nickName,
+  User(String name, String email, int height, int weight, String image, String nickName,
       SnsIdentify snsIdentify) {
     this.name = name;
     this.email = email;

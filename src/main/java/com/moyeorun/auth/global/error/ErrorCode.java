@@ -13,7 +13,11 @@ public enum ErrorCode {
 
   //idToken
   INVALID_IDTOKEN("004", "invalid idToken", 400),
-  IDTOKEN_AUTHENTICATION_FAIL("005", "idToken authentication fail", 401);
+  IDTOKEN_AUTHENTICATION_FAIL("005", "idToken authentication fail", 401),
+
+  //User
+  NICKNAME_DUPLICATE("006", "duplicate nickname", 400),
+  SNS_USER_DUPLICATE("007", "duplicate sns user", 400);
 
   private final String errorCase;
   private final String message;
