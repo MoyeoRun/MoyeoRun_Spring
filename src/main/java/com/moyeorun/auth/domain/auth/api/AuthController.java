@@ -28,9 +28,9 @@ public class AuthController {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     IdTokenAuthentication tokenAuthentication = (IdTokenAuthentication) auth;
 
-    authService.signUp(signUpRequest, tokenAuthentication.getSnsIdentify(),
+    String result = authService.signUp(signUpRequest, tokenAuthentication.getSnsIdentify(),
         tokenAuthentication.getEmail());
 
-    return SuccessResponse.successWidthData(new SignUpResponse("회원가입 성공"));
+    return SuccessResponse.successWidthData(new SignUpResponse(result));
   }
 }

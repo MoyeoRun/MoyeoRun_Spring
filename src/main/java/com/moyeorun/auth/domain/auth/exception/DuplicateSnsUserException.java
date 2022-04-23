@@ -3,9 +3,9 @@ package com.moyeorun.auth.domain.auth.exception;
 import com.moyeorun.auth.global.error.ErrorCode;
 import com.moyeorun.auth.global.error.exception.InvalidValueException;
 
-public class DuplicateSnsUser extends InvalidValueException {
+public class DuplicateSnsUserException extends InvalidValueException {
 
-  public DuplicateSnsUser() {
+  public DuplicateSnsUserException() {
     super(ErrorCode.SNS_USER_DUPLICATE);
   }
 }
