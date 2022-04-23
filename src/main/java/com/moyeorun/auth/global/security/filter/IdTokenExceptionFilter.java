@@ -2,9 +2,8 @@ package com.moyeorun.auth.global.security.filter;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.moyeorun.auth.global.common.ReUsaAbleRequestWrapper;
-import com.moyeorun.auth.global.common.response.ErrorResponseDto;
+import com.moyeorun.auth.global.common.response.ErrorResponseMap;
 import com.moyeorun.auth.global.error.ErrorCode;
 import com.moyeorun.auth.global.error.exception.BusinessException;
 import java.io.IOException;
@@ -44,13 +43,13 @@ public class IdTokenExceptionFilter extends OncePerRequestFilter {
     ObjectMapper objectMapper = new ObjectMapper();
 
     ErrorCode errorCode = e.getErrorCode();
-    ErrorResponseDto errorResponseDto = new ErrorResponseDto(errorCode.getErrorCase());
+    ErrorResponseMap errorResponseMap = new ErrorResponseMap(errorCode);
 
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding("UTF-8");
     response.setStatus(errorCode.getStatusCode());
     response.getWriter()
-        .write(objectMapper.writeValueAsString(errorResponseDto.getMap()));
+        .write(objectMapper.writeValueAsString(errorResponseMap.getMap()));
   }
 
   @Override
