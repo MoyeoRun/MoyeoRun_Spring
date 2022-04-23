@@ -40,4 +40,15 @@ public class GlobalExceptionHandler {
         .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
         .body(objectMapper.writeValueAsString(errorResponseMap.getMap()));
   }
+
+  @ExceptionHandler(Exception.class)
+  protected ResponseEntity<?> handleException(Exception e) throws IOException {
+    log.error("Not handle Exception", e);
+    ErrorCode internalError = ErrorCode.INTERNAL_SERVER_ERROR;
+    ErrorResponseMap errorResponseMap = new ErrorResponseMap(internalError);
+
+    return ResponseEntity.status(internalError.getStatusCode())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(objectMapper.writeValueAsString(errorResponseMap.getMap()));
+  }
 }
