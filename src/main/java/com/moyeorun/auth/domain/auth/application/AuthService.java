@@ -17,11 +17,11 @@ public class AuthService {
   private final UserRepository userRepository;
 
   @Transactional
-  public User signUp(SignUpRequest signUpRequest, SnsIdentify snsIdentify, String email) {
+  public void signUp(SignUpRequest signUpRequest, SnsIdentify snsIdentify, String email) {
     nicknameDuplicateCheck(signUpRequest.getNickName());
     snsUserDuplicateCheck(snsIdentify);
 
-    return userRepository.save(signUpRequest.toEntity(snsIdentify, email));
+    userRepository.save(signUpRequest.toEntity(snsIdentify, email));
   }
 
   private void nicknameDuplicateCheck(String nickName) {

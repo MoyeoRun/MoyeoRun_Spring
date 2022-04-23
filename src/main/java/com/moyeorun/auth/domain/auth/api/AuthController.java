@@ -3,6 +3,8 @@ package com.moyeorun.auth.domain.auth.api;
 import com.moyeorun.auth.domain.auth.application.AuthService;
 import com.moyeorun.auth.domain.auth.domain.User;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
+import com.moyeorun.auth.domain.auth.dto.response.SignUpResponse;
+import com.moyeorun.auth.global.common.response.SuccessResponse;
 import com.moyeorun.auth.global.security.authentication.IdTokenAuthentication;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +28,9 @@ public class AuthController {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     IdTokenAuthentication tokenAuthentication = (IdTokenAuthentication) auth;
 
-    User user = authService.signUp(signUpRequest, tokenAuthentication.getSnsIdentify(),
+    authService.signUp(signUpRequest, tokenAuthentication.getSnsIdentify(),
         tokenAuthentication.getEmail());
-    
-    return ResponseEntity.ok(user);
+
+    return SuccessResponse.successWidthData(new SignUpResponse("회원가입 성공"));
   }
 }
