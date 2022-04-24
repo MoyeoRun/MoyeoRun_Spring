@@ -2,6 +2,11 @@ package com.moyeorun.auth.global.config;
 
 import com.moyeorun.auth.global.security.filter.IdTokenExceptionFilter;
 import com.moyeorun.auth.global.security.filter.IdTokenAuthenticationFilter;
+import com.moyeorun.auth.global.security.filter.JwtAuthenticationFilter;
+import com.moyeorun.auth.global.security.filter.JwtExceptionFilter;
+import com.moyeorun.auth.global.security.handler.JwtAccessDeniedHandler;
+import com.moyeorun.auth.global.security.handler.JwtAuthenticationEntryPoint;
+import com.moyeorun.auth.global.security.jwt.JwtResolver;
 import com.moyeorun.auth.global.security.matcher.IdTokenFilterMatcher;
 import com.moyeorun.auth.global.security.provider.GoogleIdTokenAuthenticationProvider;
 import java.util.ArrayList;
@@ -18,7 +23,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.util.AntPathMatcher;
+
 
 @Configuration
 @EnableWebSecurity
@@ -27,20 +32,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
   private final GoogleIdTokenAuthenticationProvider googleIdTokenAuthenticationProvider;
+  private final JwtResolver jwtResolver;
+  private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+  private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
   protected IdTokenExceptionFilter idTokenExceptionFilter() throws Exception {
-
     return new IdTokenExceptionFilter();
   }
 
-  protected IdTokenAuthenticationFilter idTokenSignInFilter() throws Exception {
+  protected JwtExceptionFilter jwtExceptionFilter() throws Exception {
+    return new JwtExceptionFilter();
+  }
+
+  protected JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+
+    return new JwtAuthenticationFilter(jwtResolver);
+  }
+
+  protected IdTokenAuthenticationFilter idTokenAuthenticationFilter() throws Exception {
     List<AntPathRequestMatcher> applyPath = new ArrayList<>();
     applyPath.add(new AntPathRequestMatcher("/api/auth/sign-in", HttpMethod.POST.name()));
-        applyPath.add(new AntPathRequestMatcher("/api/auth/sign-up", HttpMethod.POST.name()));
+    applyPath.add(new AntPathRequestMatcher("/api/auth/sign-up", HttpMethod.POST.name()));
 
     IdTokenFilterMatcher filterMatcher = new IdTokenFilterMatcher(applyPath);
 
-    IdTokenAuthenticationFilter idTokenSignInFilter = new IdTokenAuthenticationFilter(filterMatcher);
+    IdTokenAuthenticationFilter idTokenSignInFilter = new IdTokenAuthenticationFilter(
+        filterMatcher);
 
     idTokenSignInFilter.setAuthenticationManager(super.authenticationManagerBean());
     return idTokenSignInFilter;
@@ -59,18 +76,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.addFilterBefore(idTokenSignInFilter(), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(idTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     http.addFilterBefore(idTokenExceptionFilter(), IdTokenAuthenticationFilter.class);
+
+    http.addFilterAfter(jwtAuthenticationFilter(), IdTokenAuthenticationFilter.class);
+    http.addFilterBefore(jwtExceptionFilter(), JwtAuthenticationFilter.class);
+
+
     http
         .csrf().disable()
         .formLogin().disable()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .accessDeniedHandler(jwtAccessDeniedHandler)
+        .and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
-        .antMatchers("/test").permitAll()
         .antMatchers("/api/auth/**").permitAll()
-        .anyRequest().authenticated();
-
+        .antMatchers("/api/**").authenticated();
 
   }
 }
