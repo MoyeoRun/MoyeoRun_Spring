@@ -10,6 +10,7 @@ import com.moyeorun.auth.global.security.handler.JwtAuthenticationEntryPoint;
 import com.moyeorun.auth.global.security.jwt.JwtResolver;
 import com.moyeorun.auth.global.security.matcher.IdTokenFilterMatcher;
 import com.moyeorun.auth.global.security.provider.GoogleIdTokenAuthenticationProvider;
+import com.moyeorun.auth.global.util.HeaderTokenExtractor;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private final JwtAuthenticationEntryPoint authenticationEntryPoint;
   private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
   private final ObjectMapper objectMapper;
+  private final HeaderTokenExtractor headerTokenExtractor;
 
   protected IdTokenExceptionFilter idTokenExceptionFilter() throws Exception {
     return new IdTokenExceptionFilter(objectMapper);
@@ -48,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   protected JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
 
-    return new JwtAuthenticationFilter(jwtResolver);
+    return new JwtAuthenticationFilter(jwtResolver, headerTokenExtractor);
   }
 
   protected IdTokenAuthenticationFilter idTokenAuthenticationFilter() throws Exception {
@@ -83,7 +85,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     http.addFilterAfter(jwtAuthenticationFilter(), IdTokenAuthenticationFilter.class);
     http.addFilterBefore(jwtExceptionFilter(), JwtAuthenticationFilter.class);
-
 
     http
         .csrf().disable()

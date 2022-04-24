@@ -6,13 +6,17 @@ import com.moyeorun.auth.domain.auth.dto.request.SignInRequest;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignUpResponse;
+import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.global.common.response.SuccessResponse;
 import com.moyeorun.auth.global.security.authentication.IdTokenAuthentication;
+import com.moyeorun.auth.global.util.HeaderTokenExtractor;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
+  private final HeaderTokenExtractor headerTokenExtractor;
 
   @PostMapping("/sign-up")
   public ResponseEntity<?> singUp(@Valid @RequestBody SignUpRequest signUpRequest) {
@@ -45,4 +50,14 @@ public class AuthController {
 
     return SuccessResponse.successWidthData(response);
   }
+
+  @GetMapping("/refresh")
+  public ResponseEntity<?> refresh(HttpServletRequest request){
+    String refreshToken = headerTokenExtractor.extractToken(request);
+
+    TokenDto tokenDto = authService.refresh(refreshToken);
+
+    return SuccessResponse.successWidthData(tokenDto);
+  }
+
 }

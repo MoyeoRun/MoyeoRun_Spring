@@ -8,7 +8,7 @@ public enum ErrorCode {
   //Common
   INTERNAL_SERVER_ERROR("000", "internal server error", 500),
   INVALID_INPUT_VALUE("001", "invalid input value", 400),
-  ENTITY_NOT_FOUND("002", "entity not found", 403),
+  ENTITY_NOT_FOUND("002", "entity not found", 404),
   AUTHENTICATION_FAIL("003", "authentication fail", 401),
   AUTHORIZATION_FAIL("010", "authorization fail", 403),
 
@@ -19,7 +19,7 @@ public enum ErrorCode {
   //User
   NICKNAME_DUPLICATE("006", "duplicate nickname", 400),
   SNS_USER_DUPLICATE("007", "duplicate sns user", 400),
-
+  USER_NOT_FOUND("011", "user not found", 404),
   //Jwt
   INVALID_JWT("008", "invalid jwt", 400),
   EXPIRED_JWT("009", "expired jwt", 401);
