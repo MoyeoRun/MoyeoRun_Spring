@@ -1,5 +1,6 @@
 package com.moyeorun.auth.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moyeorun.auth.global.security.filter.IdTokenExceptionFilter;
 import com.moyeorun.auth.global.security.filter.IdTokenAuthenticationFilter;
 import com.moyeorun.auth.global.security.filter.JwtAuthenticationFilter;
@@ -35,13 +36,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private final JwtResolver jwtResolver;
   private final JwtAuthenticationEntryPoint authenticationEntryPoint;
   private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+  private final ObjectMapper objectMapper;
 
   protected IdTokenExceptionFilter idTokenExceptionFilter() throws Exception {
-    return new IdTokenExceptionFilter();
+    return new IdTokenExceptionFilter(objectMapper);
   }
 
   protected JwtExceptionFilter jwtExceptionFilter() throws Exception {
-    return new JwtExceptionFilter();
+    return new JwtExceptionFilter(objectMapper);
   }
 
   protected JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {

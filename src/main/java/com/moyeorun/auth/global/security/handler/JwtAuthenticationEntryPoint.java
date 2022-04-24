@@ -1,7 +1,7 @@
 package com.moyeorun.auth.global.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moyeorun.auth.global.common.response.ErrorResponseMap;
+import com.moyeorun.auth.global.common.response.ErrorResponseBody;
 import com.moyeorun.auth.global.error.ErrorCode;
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -28,12 +28,12 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     ObjectMapper objectMapper = new ObjectMapper();
     ErrorCode code = ErrorCode.AUTHENTICATION_FAIL;
 
-    ErrorResponseMap errorResponseMap = new ErrorResponseMap(code);
+    ErrorResponseBody errorResponseBody = new ErrorResponseBody(code);
 
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding("UTF-8");
     response.setStatus(code.getStatusCode());
     response.getWriter()
-        .write(objectMapper.writeValueAsString(errorResponseMap.getMap()));
+        .write(objectMapper.writeValueAsString(errorResponseBody));
   }
 }
