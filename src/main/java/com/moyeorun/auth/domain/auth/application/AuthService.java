@@ -10,6 +10,7 @@ import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
 import com.moyeorun.auth.domain.auth.exception.UserNotFoundException;
+import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.config.property.JwtProperty;
 import com.moyeorun.auth.global.error.exception.InvalidValueException;
 import com.moyeorun.auth.global.security.jwt.JwtProvider;
@@ -86,7 +87,17 @@ public class AuthService {
     }
     throw new UserNotFoundException();
   }
-  
+
+  @Transactional
+  public MessageResponseDto logout(String token){
+    String savedId = redisUtil.getValueByStringKey(token);
+
+    if (savedId == null) {
+      throw new InvalidValueException();
+    }
+    redisUtil.deleteByStringKey(token);
+    return new MessageResponseDto("로그아웃 성공");
+  }
 
   private boolean nicknameDuplicateCheck(String nickName) {
     return userRepository.existsUserByNickName(nickName);

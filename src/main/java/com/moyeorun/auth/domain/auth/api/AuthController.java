@@ -7,6 +7,7 @@ import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignUpResponse;
 import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
+import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.common.response.SuccessResponse;
 import com.moyeorun.auth.global.security.authentication.IdTokenAuthentication;
 import com.moyeorun.auth.global.util.HeaderTokenExtractor;
@@ -52,12 +53,21 @@ public class AuthController {
   }
 
   @GetMapping("/refresh")
-  public ResponseEntity<?> refresh(HttpServletRequest request){
+  public ResponseEntity<?> refresh(HttpServletRequest request) {
     String refreshToken = headerTokenExtractor.extractToken(request);
 
     TokenDto tokenDto = authService.refresh(refreshToken);
 
     return SuccessResponse.successWidthData(tokenDto);
+  }
+
+  @GetMapping("/logout")
+  public ResponseEntity<?> logout(HttpServletRequest request) {
+    String refreshToken = headerTokenExtractor.extractToken(request);
+
+    MessageResponseDto response = authService.logout(refreshToken);
+
+    return SuccessResponse.successWidthData(response);
   }
 
 }
