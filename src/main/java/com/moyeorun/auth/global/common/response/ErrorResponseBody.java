@@ -12,7 +12,7 @@ import lombok.Getter;
 public class ErrorResponseBody {
 
   @JsonProperty("case")
-  private String errorCase;
+  private int errorCase;
 
   @JsonProperty("message")
   @JsonInclude(Include.NON_EMPTY)

@@ -6,6 +6,6 @@ import com.moyeorun.auth.global.error.exception.InvalidValueException;
 public class InvalidIdTokenException extends InvalidValueException {
 
   public InvalidIdTokenException() {
-    super(ErrorCode.INVALID_IDTOKEN);
+    super(ErrorCode.INVALID_INPUT_VALUE);
   }
 }

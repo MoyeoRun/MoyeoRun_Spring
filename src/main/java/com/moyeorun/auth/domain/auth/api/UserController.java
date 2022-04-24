@@ -37,7 +37,7 @@ public class UserController {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     Long userId = Long.valueOf(auth.getPrincipal().toString());
-    
+
     UserResponse response = userService.getUser(userId);
     return SuccessResponse.successWidthData(response);
   }

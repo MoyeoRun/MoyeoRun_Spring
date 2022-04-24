@@ -8,9 +8,9 @@ import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
 import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
-import com.moyeorun.auth.domain.auth.exception.UserNotFoundException;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.config.property.JwtProperty;
+import com.moyeorun.auth.global.error.exception.EntityNotFoundException;
 import com.moyeorun.auth.global.error.exception.InvalidValueException;
 import com.moyeorun.auth.global.security.jwt.JwtProvider;
 import com.moyeorun.auth.global.util.RedisUtil;
@@ -29,12 +29,13 @@ public class AuthService {
   private final RedisUtil redisUtil;
 
   @Transactional
-  public MessageResponseDto signUp(SignUpRequest signUpRequest, SnsIdentify snsIdentify, String email) {
-    if (nicknameDuplicateCheck(signUpRequest.getNickName())) {
+  public MessageResponseDto signUp(SignUpRequest signUpRequest, SnsIdentify snsIdentify,
+      String email) {
+    if (userRepository.existsUserByNickName(signUpRequest.getNickName())) {
       throw new DuplicateNicknameException();
     }
 
-    if (snsUserDuplicateCheck(snsIdentify)) {
+    if (userRepository.existsUserBySnsIdentify(snsIdentify)) {
       throw new DuplicateSnsUserException();
     }
 
@@ -79,11 +80,11 @@ public class AuthService {
       redisUtil.deleteByStringKey(token);
       return new TokenDto(accessToken, refreshToken);
     }
-    throw new UserNotFoundException();
+    throw new EntityNotFoundException();
   }
 
   @Transactional
-  public MessageResponseDto logout(String token){
+  public MessageResponseDto logout(String token) {
     String savedId = redisUtil.getValueByStringKey(token);
 
     if (savedId == null) {
@@ -92,13 +93,4 @@ public class AuthService {
     redisUtil.deleteByStringKey(token);
     return new MessageResponseDto("로그아웃 성공");
   }
-
-  private boolean nicknameDuplicateCheck(String nickName) {
-    return userRepository.existsUserByNickName(nickName);
-  }
-
-  private boolean snsUserDuplicateCheck(SnsIdentify snsIdentify) {
-    return userRepository.existsUserBySnsIdentify(snsIdentify);
-  }
-
 }

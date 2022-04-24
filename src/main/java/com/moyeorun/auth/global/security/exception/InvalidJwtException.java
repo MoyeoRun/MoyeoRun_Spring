@@ -6,6 +6,6 @@ import com.moyeorun.auth.global.error.exception.InvalidValueException;
 public class InvalidJwtException extends InvalidValueException {
 
   public InvalidJwtException() {
-    super(ErrorCode.INVALID_JWT);
+    super(ErrorCode.INVALID_INPUT_VALUE);
   }
 }
