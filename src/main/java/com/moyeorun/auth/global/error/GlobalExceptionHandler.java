@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,9 +31,10 @@ public class GlobalExceptionHandler {
         .body(objectMapper.writeValueAsString(errorResponseBody));
   }
 
-  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ExceptionHandler(value = {MethodArgumentNotValidException.class,
+      HttpMessageNotReadableException.class})
   private ResponseEntity<?> handleMethodArgumentNotValidException(
-      MethodArgumentNotValidException e) throws IOException {
+      Exception e) throws IOException {
     log.error(e.getMessage());
 
     ErrorCode code = ErrorCode.INVALID_INPUT_VALUE;
