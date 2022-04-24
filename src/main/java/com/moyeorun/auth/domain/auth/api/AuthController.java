@@ -1,11 +1,9 @@
 package com.moyeorun.auth.domain.auth.api;
 
 import com.moyeorun.auth.domain.auth.application.AuthService;
-import com.moyeorun.auth.domain.auth.domain.User;
 import com.moyeorun.auth.domain.auth.dto.request.SignInRequest;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
-import com.moyeorun.auth.domain.auth.dto.response.SignUpResponse;
 import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.common.response.SuccessResponse;
@@ -36,7 +34,7 @@ public class AuthController {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     IdTokenAuthentication tokenAuthentication = (IdTokenAuthentication) auth;
 
-    SignUpResponse result = authService.signUp(signUpRequest, tokenAuthentication.getSnsIdentify(),
+    MessageResponseDto result = authService.signUp(signUpRequest, tokenAuthentication.getSnsIdentify(),
         tokenAuthentication.getEmail());
 
     return SuccessResponse.successWidthData(result);
