@@ -6,12 +6,14 @@ import com.moyeorun.auth.domain.auth.domain.User;
 import com.moyeorun.auth.domain.auth.domain.contant.SnsProviderType;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
+import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.config.property.JwtProperty;
 import com.moyeorun.auth.global.error.ErrorCode;
 import com.moyeorun.auth.global.error.exception.EntityNotFoundException;
+import com.moyeorun.auth.global.error.exception.InvalidValueException;
 import com.moyeorun.auth.global.security.jwt.JwtProvider;
 import com.moyeorun.auth.global.util.RedisUtil;
 import java.util.Optional;
@@ -24,12 +26,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -48,13 +48,7 @@ public class AuthServiceTest {
 
   @InjectMocks
   AuthService authService;
-//
-//  @BeforeEach
-//  void setUp() {
-//    JwtProperty jwtProperty = new JwtProperty();
-//    jwtProperty.setAccess_token_expired_time();
-//    this.jwtProperty =
-//  }
+
 
 
   @DisplayName("회원가입시 닉네임 중복 실패")
@@ -133,7 +127,74 @@ public class AuthServiceTest {
     assertEquals(result.getToken().getRefreshToken(), mockRefreshToken);
   }
 
+  @DisplayName("refresh 테스트, 저장되지 않은 refreshToken 실패")
+  @Test
+  void refresh_실패() {
+    String mockRefreshToken = "refreshToken";
+    given(redisUtil.getValueByStringKey(any())).willReturn(null);
 
+    InvalidValueException exception = assertThrows(InvalidValueException.class, () ->
+        authService.refresh(mockRefreshToken));
+
+    assertEquals(exception.getErrorCode(), ErrorCode.INVALID_INPUT_VALUE);
+  }
+
+  @DisplayName("refresh 테스트, 없는 유지로 실패")
+  @Test
+  void refresh_없는_유저_실패() {
+    String mockRefreshToken = "refreshToken";
+    String userIdString = "1";
+    given(redisUtil.getValueByStringKey(any())).willReturn(userIdString);
+    given(userRepository.findById(any())).willReturn(Optional.ofNullable(null));
+
+    EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
+        authService.refresh(mockRefreshToken));
+
+    assertEquals(exception.getErrorCode(), ErrorCode.ENTITY_NOT_FOUND);
+  }
+
+  @DisplayName("refresh 테스트 성공")
+  @Test
+  void refresh_성공() {
+    String mockAccessToken = "accessToken";
+    String mockRefreshToken = "refreshToken";
+    String userIdString = "1";
+
+    given(redisUtil.getValueByStringKey(any())).willReturn(userIdString);
+    given(userRepository.findById(any())).willReturn(stubUserOne());
+    given(jwtProvider.createRefreshToken(any())).willReturn(mockRefreshToken);
+    given(jwtProvider.createAccessToken(any())).willReturn(mockAccessToken);
+
+    TokenDto result = authService.refresh(mockRefreshToken);
+
+    assertEquals(mockAccessToken, result.getAccessToken());
+    assertEquals(mockRefreshToken, result.getRefreshToken());
+  }
+
+  @DisplayName("로그아웃 테스트, 없는 유저로 실패")
+  @Test
+  void logOut_실패() {
+    String mockRefreshToken = "refreshToken";
+
+    given(redisUtil.getValueByStringKey(any())).willReturn(null);
+
+    InvalidValueException exception = assertThrows(InvalidValueException.class,
+        () -> authService.logout(mockRefreshToken));
+
+    assertEquals(exception.getErrorCode(), ErrorCode.INVALID_INPUT_VALUE);
+  }
+
+  @DisplayName("로그아웃 성공")
+  @Test
+  void logOut_성공(){
+    String mockRefreshToken = "refreshToken";
+
+    given(redisUtil.getValueByStringKey(any())).willReturn("1");
+
+    MessageResponseDto result = authService.logout(mockRefreshToken);
+
+    assertEquals(result.getMessage(),"로그아웃 성공");
+  }
 
   private SignUpRequest signUpRequestDtoMock() {
     return new SignUpRequest("idtokenValue", SnsProviderType.GOOGLE, "imageurl..", "name1",
