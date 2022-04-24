@@ -2,6 +2,7 @@ package com.moyeorun.auth.global.security.filter;
 
 import com.moyeorun.auth.global.security.exception.InvalidJwtException;
 import com.moyeorun.auth.global.security.jwt.JwtResolver;
+import com.moyeorun.auth.global.util.HeaderTokenExtractor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +24,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtResolver jwtResolver;
   private final AntPathMatcher pathMatcher = new AntPathMatcher();
+  private final HeaderTokenExtractor headerTokenExtractor;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     log.info("jwt authentication filter");
-    String jwtToken = jwtResolver.extractToken(request);
+    String jwtToken = headerTokenExtractor.extractToken(request);
 
     if (StringUtils.hasText(jwtToken) && jwtResolver.validationToken(jwtToken)) {
       Authentication authentication = jwtResolver.getAuthentication(jwtToken);

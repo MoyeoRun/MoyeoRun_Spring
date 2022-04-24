@@ -34,8 +34,6 @@ import org.springframework.util.StringUtils;
 @Component
 public class JwtResolver {
 
-  private static final String AUTHORIZATION_HEADER = "Authorization";
-  private static final String HEADER_PREFIX = "Bearer";
   private static final String AUTHORITIES_KEY = "auth";
   private final Key key;
 
@@ -43,15 +41,6 @@ public class JwtResolver {
 
     byte[] keyByte = Decoders.BASE64.decode(jwtProperty.getSecret_key());
     this.key = Keys.hmacShaKeyFor(keyByte);
-  }
-
-  public String extractToken(HttpServletRequest request) {
-    String bearerHeader = request.getHeader(AUTHORIZATION_HEADER);
-
-    if (StringUtils.hasText(bearerHeader) && bearerHeader.startsWith(HEADER_PREFIX)) {
-      return bearerHeader.substring(HEADER_PREFIX.length());
-    }
-    return null;
   }
 
   public Authentication getAuthentication(String token) {
