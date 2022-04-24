@@ -17,13 +17,16 @@ public class JwtProvider {
   private final Long ACCESS_TOKEN_EXPIRED_TIME_SECOND;
   private final Long REFRESH_TOKEN_EXPIRED_TIME_SECOND;
   private final Key key;
+  private final Key refreshKey;
 
   public JwtProvider(JwtProperty jwtProperty) {
     this.ACCESS_TOKEN_EXPIRED_TIME_SECOND = jwtProperty.getAccess_token_expired_time();
     this.REFRESH_TOKEN_EXPIRED_TIME_SECOND = jwtProperty.getRefresh_token_expired_time();
 
     byte[] keyByte = Decoders.BASE64.decode(jwtProperty.getSecret_key());
+    byte[] refreshKey = Decoders.BASE64.decode(jwtProperty.getRefresh_key());
     this.key = Keys.hmacShaKeyFor(keyByte);
+    this.refreshKey = Keys.hmacShaKeyFor(refreshKey);
   }
 
 
@@ -47,7 +50,7 @@ public class JwtProvider {
         .setSubject(user.getId().toString())
         .setExpiration(accessTokenExpiredIn)
         .claim(AUTHORITIES_KEY, user.getRole())
-        .signWith(key)
+        .signWith(refreshKey)
         .compact();
   }
 
