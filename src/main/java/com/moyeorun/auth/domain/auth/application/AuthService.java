@@ -4,6 +4,7 @@ import com.moyeorun.auth.domain.auth.dao.UserRepository;
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.domain.User;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
+import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
 import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
@@ -61,7 +62,7 @@ public class AuthService {
   }
 
   @Transactional
-  public TokenDto refresh(String token) {
+  public RefreshResponse refresh(String token) {
     String savedId = redisUtil.getValueByStringKey(token);
 
     if (savedId == null) {
@@ -72,13 +73,8 @@ public class AuthService {
 
     if (findUser.isPresent()) {
       String accessToken = jwtProvider.createAccessToken(findUser.get());
-      String refreshToken = jwtProvider.createRefreshToken(findUser.get());
 
-      redisUtil.setStringWidthExpire(refreshToken, findUser.get().getId().toString(),
-          jwtProperty.getRefresh_token_expired_time());
-
-      redisUtil.deleteByStringKey(token);
-      return new TokenDto(accessToken, refreshToken);
+      return new RefreshResponse(accessToken);
     }
     throw new EntityNotFoundException();
   }

@@ -5,8 +5,8 @@ import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.domain.User;
 import com.moyeorun.auth.domain.auth.domain.contant.SnsProviderType;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
+import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
-import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
@@ -162,13 +162,11 @@ public class AuthServiceTest {
 
     given(redisUtil.getValueByStringKey(any())).willReturn(userIdString);
     given(userRepository.findById(any())).willReturn(stubUserOne());
-    given(jwtProvider.createRefreshToken(any())).willReturn(mockRefreshToken);
     given(jwtProvider.createAccessToken(any())).willReturn(mockAccessToken);
 
-    TokenDto result = authService.refresh(mockRefreshToken);
+    RefreshResponse result = authService.refresh(mockRefreshToken);
 
     assertEquals(mockAccessToken, result.getAccessToken());
-    assertEquals(mockRefreshToken, result.getRefreshToken());
   }
 
   @DisplayName("로그아웃 테스트, 없는 유저로 실패")
