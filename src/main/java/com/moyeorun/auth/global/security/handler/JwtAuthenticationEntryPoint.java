@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -15,7 +16,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+  ObjectMapper objectMapper;
 
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response,
@@ -25,7 +29,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
   }
 
   private void sendResponse(HttpServletResponse response) throws IOException {
-    ObjectMapper objectMapper = new ObjectMapper();
     ErrorCode code = ErrorCode.AUTHENTICATION_FAIL;
 
     ErrorResponseBody errorResponseBody = new ErrorResponseBody(code);

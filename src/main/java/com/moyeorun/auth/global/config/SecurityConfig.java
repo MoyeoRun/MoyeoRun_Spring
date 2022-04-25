@@ -61,7 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     IdTokenFilterMatcher filterMatcher = new IdTokenFilterMatcher(applyPath);
 
     IdTokenAuthenticationFilter idTokenSignInFilter = new IdTokenAuthenticationFilter(
-        filterMatcher);
+        filterMatcher, objectMapper);
 
     idTokenSignInFilter.setAuthenticationManager(super.authenticationManagerBean());
     return idTokenSignInFilter;

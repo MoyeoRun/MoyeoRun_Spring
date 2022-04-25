@@ -17,6 +17,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -28,14 +29,12 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Slf4j
 public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
 
-  protected IdTokenAuthenticationFilter(String defaultFilterProcessesUrl) {
-    super(defaultFilterProcessesUrl);
-  }
 
-  public IdTokenAuthenticationFilter(RequestMatcher requestMatcher) {
+  public IdTokenAuthenticationFilter(RequestMatcher requestMatcher, ObjectMapper objectMapper) {
     super(requestMatcher);
+    this.objectMapper = objectMapper;
   }
 
   @Override
