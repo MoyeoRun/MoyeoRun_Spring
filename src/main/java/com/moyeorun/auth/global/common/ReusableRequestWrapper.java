@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 
-public class ReUsaAbleRequestWrapper extends HttpServletRequestWrapper {
+public class ReusableRequestWrapper extends HttpServletRequestWrapper {
 
   private ByteArrayOutputStream cachedBytes;
 
-  public ReUsaAbleRequestWrapper(HttpServletRequest request) throws IOException {
+  public ReusableRequestWrapper(HttpServletRequest request) throws IOException {
     super(request);
   }
 

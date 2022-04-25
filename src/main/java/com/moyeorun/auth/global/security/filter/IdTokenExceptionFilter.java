@@ -2,7 +2,7 @@ package com.moyeorun.auth.global.security.filter;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moyeorun.auth.global.common.ReUsaAbleRequestWrapper;
+import com.moyeorun.auth.global.common.ReusableRequestWrapper;
 import com.moyeorun.auth.global.common.response.ErrorResponseBody;
 import com.moyeorun.auth.global.error.ErrorCode;
 import com.moyeorun.auth.global.error.exception.BusinessException;
@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
@@ -28,7 +27,7 @@ public class IdTokenExceptionFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
     log.info(request.getRequestURI() + "idToken Exception Filter");
 
-    ReUsaAbleRequestWrapper requestWrapper = new ReUsaAbleRequestWrapper(request);
+    ReusableRequestWrapper requestWrapper = new ReusableRequestWrapper(request);
 
     try {
       filterChain.doFilter(requestWrapper, response);
