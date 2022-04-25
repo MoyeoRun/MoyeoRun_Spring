@@ -1,11 +1,10 @@
 package com.moyeorun.auth.global.security.exception;
 
-import com.moyeorun.auth.global.error.ErrorCode;
-import com.moyeorun.auth.global.error.exception.AuthenticationFailException;
+import org.springframework.security.core.AuthenticationException;
 
-public class IdTokenAuthenticationException extends AuthenticationFailException {
+public class IdTokenAuthenticationException extends AuthenticationException {
 
   public IdTokenAuthenticationException() {
-    super(ErrorCode.AUTHENTICATION_FAIL);
+    super("인증 실패");
   }
 }

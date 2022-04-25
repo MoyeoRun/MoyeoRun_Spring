@@ -3,11 +3,14 @@ package com.moyeorun.auth.global.security.filter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
+import com.moyeorun.auth.global.common.response.ErrorResponseBody;
+import com.moyeorun.auth.global.error.ErrorCode;
 import com.moyeorun.auth.global.error.exception.InvalidValueException;
 import com.moyeorun.auth.global.security.authentication.AppleAuthenticationIdToken;
 import com.moyeorun.auth.global.security.authentication.GoogleAuthenticationIdToken;
 import com.moyeorun.auth.domain.auth.dto.request.SignInRequest;
 import com.moyeorun.auth.global.security.dto.IdTokenDto;
+import com.moyeorun.auth.global.security.exception.InvalidIdTokenException;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
@@ -15,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,7 +37,7 @@ public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessin
   public IdTokenAuthenticationFilter(RequestMatcher requestMatcher) {
     super(requestMatcher);
   }
-  
+
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
       HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
@@ -53,7 +57,7 @@ public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessin
 
     if (idTokenDto.getProviderType() == null) {
       log.error("null Error");
-      throw new InvalidValueException();
+      throw new InvalidIdTokenException();
     }
 
     switch (idTokenDto.getProviderType()) {
@@ -65,7 +69,7 @@ public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessin
         return super.getAuthenticationManager()
             .authenticate(new AppleAuthenticationIdToken(idTokenDto.getIdToken()));
       }
-      default -> throw new InvalidValueException();
+      default -> throw new InvalidIdTokenException();
     }
   }
 
@@ -76,7 +80,7 @@ public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessin
       return new IdTokenDto(signInRequestDto.getIdToken(), signInRequestDto.getProviderType());
     } catch (JsonProcessingException e) {
       log.error(e.getMessage());
-      throw new InvalidValueException();
+      throw new InvalidIdTokenException();
     }
   }
 
@@ -86,7 +90,7 @@ public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessin
       return new IdTokenDto(signUpRequestDto.getIdToken(), signUpRequestDto.getProviderType());
     } catch (JsonProcessingException e) {
       log.error(e.getMessage());
-      throw new InvalidValueException();
+      throw new InvalidIdTokenException();
     }
   }
 
@@ -103,7 +107,13 @@ public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessin
   protected void unsuccessfulAuthentication(HttpServletRequest request,
       HttpServletResponse response, AuthenticationException failed)
       throws IOException, ServletException {
-    log.info("인증 실패");
-    super.unsuccessfulAuthentication(request, response, failed);
+
+    ErrorCode errorCode = ErrorCode.AUTHENTICATION_FAIL;
+    ErrorResponseBody errorResponseBody = new ErrorResponseBody(errorCode);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding("UTF-8");
+    response.setStatus(errorCode.getStatusCode());
+    response.getWriter()
+        .write(objectMapper.writeValueAsString(errorResponseBody));
   }
 }

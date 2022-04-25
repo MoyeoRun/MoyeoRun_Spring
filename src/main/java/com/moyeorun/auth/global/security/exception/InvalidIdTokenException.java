@@ -1,11 +1,11 @@
 package com.moyeorun.auth.global.security.exception;
 
-import com.moyeorun.auth.global.error.ErrorCode;
-import com.moyeorun.auth.global.error.exception.InvalidValueException;
 
-public class InvalidIdTokenException extends InvalidValueException {
+import org.springframework.security.core.AuthenticationException;
+
+public class InvalidIdTokenException extends AuthenticationException {
 
   public InvalidIdTokenException() {
-    super(ErrorCode.INVALID_INPUT_VALUE);
+    super("인증 실패");
   }
 }
