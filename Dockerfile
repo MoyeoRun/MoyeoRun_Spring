@@ -1,9 +1,11 @@
-FROM openjdk:11-jdk
+FROM openjdk:17-oracle
+
+WORKDIR app
 
 ARG JAV_FILE=./build/libs/*.jar
 
-COPY ${JAV_FILE} app.jar
+COPY ${JAV_FILE} ./
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","/app.jar","--spring.config.location=file:/src/main/resoucres/application.yml"]
+ENTRYPOINT ["java","-jar","./auth-0.0.1-SNAPSHOT.jar"]
