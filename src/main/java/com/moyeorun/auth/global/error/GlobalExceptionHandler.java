@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,7 +33,8 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(value = {MethodArgumentNotValidException.class,
-      HttpMessageNotReadableException.class})
+      HttpMessageNotReadableException.class,
+  })
   private ResponseEntity<?> handleMethodArgumentNotValidException(
       Exception e) throws IOException {
     log.error(e.getMessage());
@@ -40,6 +42,20 @@ public class GlobalExceptionHandler {
     ErrorCode code = ErrorCode.INVALID_INPUT_VALUE;
     ErrorResponseBody errorResponseBody = new ErrorResponseBody(code);
 
+    return ResponseEntity.status(code.getStatusCode())
+        .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
+        .body(objectMapper.writeValueAsString(errorResponseBody));
+  }
+
+
+  @ExceptionHandler(
+      HttpRequestMethodNotSupportedException.class)
+  private ResponseEntity<?> handleRequestMethodNotSupport(
+      HttpRequestMethodNotSupportedException e) throws IOException {
+    log.error(e.getMessage());
+
+    ErrorCode code = ErrorCode.NOT_SUPPORT_METHOD;
+    ErrorResponseBody errorResponseBody = new ErrorResponseBody(code);
     return ResponseEntity.status(code.getStatusCode())
         .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
         .body(objectMapper.writeValueAsString(errorResponseBody));
