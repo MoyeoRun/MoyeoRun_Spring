@@ -12,6 +12,7 @@ public enum ErrorCode {
   AUTHORIZATION_FAIL(102, "authorization fail", 403),
   ENTITY_NOT_FOUND(103, "entity not found", 404),
   EXPIRED_JWT(104, "expired jwt", 401),
+  NOT_SIGN_IN_USER(105, "not sign in user request", 401),
 
   //idToken
 //  INVALID_IDTOKEN(110, "invalid idToken", 400),

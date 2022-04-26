@@ -9,6 +9,7 @@ import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
+import com.moyeorun.auth.domain.auth.exception.NotSignInException;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.config.property.JwtProperty;
 import com.moyeorun.auth.global.error.ErrorCode;
@@ -48,7 +49,6 @@ public class AuthServiceTest {
 
   @InjectMocks
   AuthService authService;
-
 
 
   @DisplayName("회원가입시 닉네임 중복 실패")
@@ -133,10 +133,10 @@ public class AuthServiceTest {
     String mockRefreshToken = "refreshToken";
     given(redisUtil.getValueByStringKey(any())).willReturn(null);
 
-    InvalidValueException exception = assertThrows(InvalidValueException.class, () ->
+    NotSignInException exception = assertThrows(NotSignInException.class, () ->
         authService.refresh(mockRefreshToken));
 
-    assertEquals(exception.getErrorCode(), ErrorCode.INVALID_INPUT_VALUE);
+    assertEquals(exception.getErrorCode(), ErrorCode.NOT_SIGN_IN_USER);
   }
 
   @DisplayName("refresh 테스트, 없는 유지로 실패")
@@ -176,22 +176,22 @@ public class AuthServiceTest {
 
     given(redisUtil.getValueByStringKey(any())).willReturn(null);
 
-    InvalidValueException exception = assertThrows(InvalidValueException.class,
+    NotSignInException exception = assertThrows(NotSignInException.class,
         () -> authService.logout(mockRefreshToken));
 
-    assertEquals(exception.getErrorCode(), ErrorCode.INVALID_INPUT_VALUE);
+    assertEquals(exception.getErrorCode(), ErrorCode.NOT_SIGN_IN_USER);
   }
 
   @DisplayName("로그아웃 성공")
   @Test
-  void logOut_성공(){
+  void logOut_성공() {
     String mockRefreshToken = "refreshToken";
 
     given(redisUtil.getValueByStringKey(any())).willReturn("1");
 
     MessageResponseDto result = authService.logout(mockRefreshToken);
 
-    assertEquals(result.getMessage(),"로그아웃 성공");
+    assertEquals(result.getMessage(), "로그아웃 성공");
   }
 
   private SignUpRequest signUpRequestDtoMock() {

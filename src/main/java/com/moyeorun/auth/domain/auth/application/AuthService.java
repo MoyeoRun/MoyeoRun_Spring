@@ -9,6 +9,7 @@ import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
 import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
+import com.moyeorun.auth.domain.auth.exception.NotSignInException;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.config.property.JwtProperty;
 import com.moyeorun.auth.global.error.exception.EntityNotFoundException;
@@ -66,7 +67,7 @@ public class AuthService {
     String savedId = redisUtil.getValueByStringKey(token);
 
     if (savedId == null) {
-      throw new InvalidValueException();
+      throw new NotSignInException();
     }
 
     Optional<User> findUser = userRepository.findById(Long.valueOf(savedId));
@@ -84,7 +85,7 @@ public class AuthService {
     String savedId = redisUtil.getValueByStringKey(token);
 
     if (savedId == null) {
-      throw new InvalidValueException();
+      throw new NotSignInException();
     }
     redisUtil.deleteByStringKey(token);
     return new MessageResponseDto("로그아웃 성공");
