@@ -1,6 +1,7 @@
 package com.moyeorun.auth.domain.auth.dto.response;
 
 import com.moyeorun.auth.domain.auth.domain.User;
+import com.moyeorun.auth.domain.auth.domain.contant.GenderType;
 import lombok.Getter;
 
 @Getter
@@ -14,9 +15,7 @@ public class UserResponse {
 
   private String email;
 
-  private int height;
-
-  private int weight;
+  private GenderType gender;
 
   private String image;
 
@@ -25,8 +24,7 @@ public class UserResponse {
     this.name = user.getName();
     this.nickName = user.getNickName();
     this.email = user.getEmail();
-    this.height = user.getHeight();
-    this.weight = user.getWeight();
+    this.gender = user.getGender();
     this.image = user.getImage();
   }
 }

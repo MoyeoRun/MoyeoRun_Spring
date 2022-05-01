@@ -1,5 +1,6 @@
 package com.moyeorun.auth.domain.auth.domain;
 
+import com.moyeorun.auth.domain.auth.domain.contant.GenderType;
 import com.moyeorun.auth.domain.auth.domain.contant.RoleType;
 import com.moyeorun.auth.domain.model.BaseTimeEntity;
 import javax.persistence.Column;
@@ -34,11 +35,9 @@ public class User extends BaseTimeEntity {
   @Column(name = "email", nullable = false)
   private String email;
 
-  @Column(name = "height", nullable = false)
-  private int height;
-
-  @Column(name = "weight", nullable = false)
-  private int weight;
+  @Column(name = "gender", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private GenderType gender;
 
   @Column(name = "image", nullable = false)
   private String image;
@@ -58,12 +57,11 @@ public class User extends BaseTimeEntity {
   private RoleType role;
 
   @Builder
-  User(String name, String email, int height, int weight, String image, String nickName,
+  User(String name, String email, GenderType gender, String image, String nickName,
       SnsIdentify snsIdentify) {
     this.name = name;
     this.email = email;
-    this.height = height;
-    this.weight = weight;
+    this.gender = gender;
     this.image = image;
     this.nickName = nickName;
     this.snsIdentify = snsIdentify;

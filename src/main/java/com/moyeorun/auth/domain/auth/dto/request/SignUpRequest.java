@@ -2,6 +2,7 @@ package com.moyeorun.auth.domain.auth.dto.request;
 
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.domain.User;
+import com.moyeorun.auth.domain.auth.domain.contant.GenderType;
 import com.moyeorun.auth.domain.auth.domain.contant.SnsProviderType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -29,21 +30,15 @@ public class SignUpRequest {
   @NotBlank
   private String nickName;
 
-  @NotNull
-  @Positive
-  private Integer weight;
-
-  @NotNull
-  @Positive
-  private Integer height;
+  @NotBlank
+  private GenderType gender;
 
   public User toEntity(SnsIdentify snsIdentify, String email) {
     return User.builder()
         .image(image)
         .name(name)
         .nickName(nickName)
-        .weight(weight)
-        .height(height)
+        .gender(gender)
         .snsIdentify(snsIdentify)
         .email(email)
         .build();
