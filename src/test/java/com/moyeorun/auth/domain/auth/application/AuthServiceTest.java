@@ -3,10 +3,12 @@ package com.moyeorun.auth.domain.auth.application;
 import com.moyeorun.auth.domain.auth.dao.UserRepository;
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.domain.User;
+import com.moyeorun.auth.domain.auth.domain.contant.GenderType;
 import com.moyeorun.auth.domain.auth.domain.contant.SnsProviderType;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
+import com.moyeorun.auth.domain.auth.dto.response.SignUpResponse;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
 import com.moyeorun.auth.domain.auth.exception.NotSignInException;
@@ -87,13 +89,22 @@ public class AuthServiceTest {
     SignUpRequest dto = signUpRequestDtoMock();
     SnsIdentify snsIdentify = new SnsIdentify("12345", SnsProviderType.GOOGLE);
     String email = "test@test.com";
+    String mockAccessToken = "accessToken";
+    String mockRefreshToken = "refreshToken";
+
+    Optional<User> user = stubUserOne();
 
     given(userRepository.existsUserByNickName(any())).willReturn(false);
     given(userRepository.existsUserBySnsIdentify(any())).willReturn(false);
+    given(jwtProvider.createAccessToken(any())).willReturn(mockAccessToken);
+    given(jwtProvider.createRefreshToken(any())).willReturn(mockRefreshToken);
+    given(userRepository.save(any())).willReturn(user.get());
 
-    MessageResponseDto result = authService.signUp(dto, snsIdentify, email);
+    SignUpResponse result = authService.signUp(dto, snsIdentify, email);
 
-    assertEquals(result.getMessage(), "회원가입 성공");
+    assertEquals(result.getToken().getAccessToken(), mockAccessToken);
+    assertEquals(result.getToken().getRefreshToken(), mockRefreshToken);
+    assertEquals(result.getUserId(), user.get().getId());
   }
 
   @DisplayName("로그인 시 없는 유저 로그인 실패")
@@ -196,15 +207,14 @@ public class AuthServiceTest {
 
   private SignUpRequest signUpRequestDtoMock() {
     return new SignUpRequest("idtokenValue", SnsProviderType.GOOGLE, "imageurl..", "name1",
-        "nickname1", 100, 100);
+        "nickname1", GenderType.MALE);
   }
 
   private Optional<User> stubUserOne() {
     User user = User.builder()
         .email("email@email.com")
         .snsIdentify(new SnsIdentify("12345", SnsProviderType.GOOGLE))
-        .height(100)
-        .weight(100)
+        .gender(GenderType.MALE)
         .nickName("nickname..")
         .name("name..")
         .image("imageurl..")

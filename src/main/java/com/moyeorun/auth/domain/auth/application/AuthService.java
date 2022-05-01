@@ -6,6 +6,7 @@ import com.moyeorun.auth.domain.auth.domain.User;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
+import com.moyeorun.auth.domain.auth.dto.response.SignUpResponse;
 import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.domain.auth.exception.DuplicateNicknameException;
 import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
@@ -31,7 +32,7 @@ public class AuthService {
   private final RedisUtil redisUtil;
 
   @Transactional
-  public MessageResponseDto signUp(SignUpRequest signUpRequest, SnsIdentify snsIdentify,
+  public SignUpResponse signUp(SignUpRequest signUpRequest, SnsIdentify snsIdentify,
       String email) {
     if (userRepository.existsUserByNickName(signUpRequest.getNickName())) {
       throw new DuplicateNicknameException();
@@ -41,8 +42,15 @@ public class AuthService {
       throw new DuplicateSnsUserException();
     }
 
-    userRepository.save(signUpRequest.toEntity(snsIdentify, email));
-    return new MessageResponseDto("회원가입 성공");
+    User savedUser = userRepository.save(signUpRequest.toEntity(snsIdentify, email));
+
+    String accessToken = jwtProvider.createAccessToken(savedUser);
+    String refreshToken = jwtProvider.createRefreshToken(savedUser);
+
+    redisUtil.setStringWidthExpire(refreshToken, savedUser.getId().toString(),
+        jwtProperty.getRefresh_token_expired_time());
+
+    return new SignUpResponse(savedUser, new TokenDto(accessToken, refreshToken));
   }
 
   @Transactional

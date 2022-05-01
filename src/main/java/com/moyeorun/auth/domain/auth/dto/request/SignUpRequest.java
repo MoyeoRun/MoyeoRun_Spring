@@ -30,7 +30,7 @@ public class SignUpRequest {
   @NotBlank
   private String nickName;
 
-  @NotBlank
+  @NotNull
   private GenderType gender;
 
   public User toEntity(SnsIdentify snsIdentify, String email) {
