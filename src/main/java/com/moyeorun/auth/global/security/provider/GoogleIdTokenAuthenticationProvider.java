@@ -6,6 +6,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
+import com.moyeorun.auth.domain.auth.domain.contant.SnsProviderType;
 import com.moyeorun.auth.global.config.property.OAuthProviderProperty;
 import com.moyeorun.auth.global.security.authentication.GoogleAuthenticationIdToken;
 import com.moyeorun.auth.global.security.exception.IdTokenAuthenticationException;
@@ -33,8 +34,7 @@ public class GoogleIdTokenAuthenticationProvider implements AuthenticationProvid
   @Override
   public Authentication authenticate(Authentication authentication)
       throws AuthenticationException {
-    GoogleAuthenticationIdToken token = (GoogleAuthenticationIdToken) authentication;
-    Payload payload = verifierGoogleIdToken(token.getIdToken());
+    Payload payload = verifierGoogleIdToken(authentication.getCredentials().toString());
 
     if (payload == null) {
       log.error("idToken's payload is null");
@@ -42,7 +42,7 @@ public class GoogleIdTokenAuthenticationProvider implements AuthenticationProvid
     }
 
     SnsIdentify snsIdentify = new SnsIdentify(payload.getSubject(),
-        token.getProviderType());
+        SnsProviderType.GOOGLE);
     String email = payload.getEmail();
     return new GoogleAuthenticationIdToken(email, snsIdentify, new ArrayList<>());
   }

@@ -2,23 +2,21 @@ package com.moyeorun.auth.global.security.authentication;
 
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.domain.contant.SnsProviderType;
+import java.util.ArrayList;
 import java.util.Collection;
 import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
-@Getter
-public class AppleAuthenticationIdToken extends AbstractAuthenticationToken implements
-    IdTokenAuthentication {
+public class AppleAuthenticationIdToken extends AbstractAuthenticationToken {
 
-  private String idToken;
+  private String credentials;
   private String email;
   private SnsIdentify snsIdentify;
-  private final SnsProviderType providerType = SnsProviderType.APPLE;
 
   public AppleAuthenticationIdToken(String idToken) {
-    super(null);
-    this.idToken = idToken;
+    super(new ArrayList<>());
+    this.credentials = idToken;
     setAuthenticated(false);
   }
 
@@ -33,11 +31,16 @@ public class AppleAuthenticationIdToken extends AbstractAuthenticationToken impl
 
   @Override
   public Object getCredentials() {
-    return null;
+    return this.credentials;
+  }
+
+  @Override
+  public Object getDetails() {
+    return this.email;
   }
 
   @Override
   public Object getPrincipal() {
-    return null;
+    return this.snsIdentify;
   }
 }

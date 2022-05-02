@@ -1,15 +1,14 @@
 package com.moyeorun.auth.domain.auth.api;
 
 import com.moyeorun.auth.domain.auth.application.AuthService;
+import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.dto.request.SignInRequest;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignUpResponse;
-import com.moyeorun.auth.domain.auth.dto.response.TokenDto;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.common.response.SuccessResponse;
-import com.moyeorun.auth.global.security.authentication.IdTokenAuthentication;
 import com.moyeorun.auth.global.util.HeaderTokenExtractor;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -34,10 +33,9 @@ public class AuthController {
   @PostMapping("/sign-up")
   public ResponseEntity<?> singUp(@Valid @RequestBody SignUpRequest signUpRequest) {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    IdTokenAuthentication tokenAuthentication = (IdTokenAuthentication) auth;
 
-    SignUpResponse result = authService.signUp(signUpRequest, tokenAuthentication.getSnsIdentify(),
-        tokenAuthentication.getEmail());
+    SignUpResponse result = authService.signUp(signUpRequest, (SnsIdentify) auth.getPrincipal(),
+        auth.getDetails().toString());
 
     return SuccessResponse.successWidthData(result);
   }
@@ -45,9 +43,8 @@ public class AuthController {
   @PostMapping("/sign-in")
   public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    IdTokenAuthentication tokenAuthentication = (IdTokenAuthentication) auth;
 
-    SignInResponse response = authService.signIn(tokenAuthentication.getSnsIdentify());
+    SignInResponse response = authService.signIn((SnsIdentify) auth.getPrincipal());
 
     return SuccessResponse.successWidthData(response);
   }

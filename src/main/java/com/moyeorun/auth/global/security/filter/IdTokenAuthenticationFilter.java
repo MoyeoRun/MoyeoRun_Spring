@@ -96,9 +96,8 @@ public class IdTokenAuthenticationFilter extends AbstractAuthenticationProcessin
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       FilterChain chain, Authentication authResult) throws IOException, ServletException {
-    GoogleAuthenticationIdToken authenticationIdToken = (GoogleAuthenticationIdToken) authResult;
     log.info("success auth");
-    SecurityContextHolder.getContext().setAuthentication(authenticationIdToken);
+    SecurityContextHolder.getContext().setAuthentication(authResult);
     chain.doFilter(request, response);
   }
 
