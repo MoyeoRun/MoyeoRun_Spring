@@ -4,7 +4,9 @@ import com.moyeorun.auth.domain.auth.dao.UserRepository;
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.domain.User;
 import com.moyeorun.auth.domain.auth.domain.contant.GenderType;
+import com.moyeorun.auth.domain.auth.domain.contant.RoleType;
 import com.moyeorun.auth.domain.auth.domain.contant.SnsProviderType;
+import com.moyeorun.auth.domain.auth.dto.request.RefreshRequest;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
@@ -15,12 +17,12 @@ import com.moyeorun.auth.domain.auth.exception.NotSignInException;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.config.property.JwtProperty;
 import com.moyeorun.auth.global.error.ErrorCode;
-import com.moyeorun.auth.global.error.exception.EntityNotFoundException;
-import com.moyeorun.auth.global.error.exception.InvalidValueException;
+import com.moyeorun.auth.global.security.exception.InvalidJwtException;
+import com.moyeorun.auth.global.security.jwt.JwtClaimsVo;
 import com.moyeorun.auth.global.security.jwt.JwtProvider;
+import com.moyeorun.auth.global.security.jwt.JwtResolver;
 import com.moyeorun.auth.global.util.RedisUtil;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +32,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -42,6 +46,9 @@ public class AuthServiceTest {
 
   @Mock
   JwtProvider jwtProvider;
+
+  @Mock
+  JwtResolver jwtResolver;
 
   @Mock
   JwtProperty jwtProperty;
@@ -89,22 +96,15 @@ public class AuthServiceTest {
     SignUpRequest dto = signUpRequestDtoMock();
     SnsIdentify snsIdentify = new SnsIdentify("12345", SnsProviderType.GOOGLE);
     String email = "test@test.com";
-    String mockAccessToken = "accessToken";
-    String mockRefreshToken = "refreshToken";
-
     Optional<User> user = stubUserOne();
 
     given(userRepository.existsUserByNickName(any())).willReturn(false);
     given(userRepository.existsUserBySnsIdentify(any())).willReturn(false);
-    given(jwtProvider.createAccessToken(any())).willReturn(mockAccessToken);
-    given(jwtProvider.createRefreshToken(any())).willReturn(mockRefreshToken);
     given(userRepository.save(any())).willReturn(user.get());
 
     SignUpResponse result = authService.signUp(dto, snsIdentify, email);
 
-    assertEquals(result.getToken().getAccessToken(), mockAccessToken);
-    assertEquals(result.getToken().getRefreshToken(), mockRefreshToken);
-    assertEquals(result.getUserId(), user.get().getId());
+    assertEquals(user.get().getId(), result.getUserId());
   }
 
   @DisplayName("로그인 시 없는 유저 로그인 실패")
@@ -116,52 +116,55 @@ public class AuthServiceTest {
 
     SignInResponse result = authService.signIn(snsIdentify);
 
-    assertEquals(result.isNewUser(), true);
+    assertTrue(result.isNewUser());
   }
 
   @DisplayName("로그인 성공")
   @Test
   void singIn_성공() {
     SnsIdentify snsIdentify = new SnsIdentify("12345", SnsProviderType.GOOGLE);
-    String mockAccessToken = "accessToken";
-    String mockRefreshToken = "refreshToken";
 
     given(userRepository.findBySnsIdentify(any())).willReturn(stubUserOne());
-    given(jwtProvider.createAccessToken(any())).willReturn(mockAccessToken);
-    given(jwtProvider.createRefreshToken(any())).willReturn(mockRefreshToken);
 
     SignInResponse result = authService.signIn(snsIdentify);
 
-    assertEquals(result.isNewUser(), false);
-    assertEquals(result.getUserId(), 1L);
-    assertEquals(result.getToken().getAccessToken(), mockAccessToken);
-    assertEquals(result.getToken().getRefreshToken(), mockRefreshToken);
+    assertFalse(result.isNewUser());
+    assertEquals(1L, result.getUserId());
   }
 
-  @DisplayName("refresh 테스트, 저장되지 않은 refreshToken 실패")
+  @DisplayName("refresh 테스트, 저장되지 않은 refreshToken 실패(로그인 안됨)")
   @Test
-  void refresh_실패() {
+  void refresh_로그인_안된유저_실패() {
+    String mockAccessToken = "accessToken";
     String mockRefreshToken = "refreshToken";
+    RefreshRequest refreshRequest = new RefreshRequest(mockAccessToken, mockRefreshToken);
+    JwtClaimsVo jwtClaimsVo = new JwtClaimsVo("1", RoleType.USER);
+
+    given(jwtResolver.getClaimByJwt(any())).willReturn(jwtClaimsVo);
     given(redisUtil.getValueByStringKey(any())).willReturn(null);
 
     NotSignInException exception = assertThrows(NotSignInException.class, () ->
-        authService.refresh(mockRefreshToken));
+        authService.refresh(refreshRequest));
 
-    assertEquals(exception.getErrorCode(), ErrorCode.NOT_SIGN_IN_USER);
+    assertEquals(ErrorCode.NOT_SIGN_IN_USER, exception.getErrorCode());
   }
 
-  @DisplayName("refresh 테스트, 없는 유지로 실패")
+  @DisplayName("refresh 테스트,저장된 토큰과 불일치로 실패")
   @Test
-  void refresh_없는_유저_실패() {
+  void refresh_저장된토큰과_불일치() {
     String mockRefreshToken = "refreshToken";
     String userIdString = "1";
-    given(redisUtil.getValueByStringKey(any())).willReturn(userIdString);
-    given(userRepository.findById(any())).willReturn(Optional.ofNullable(null));
+    String mockAccessToken = "accessToken";
+    RefreshRequest refreshRequest = new RefreshRequest(mockAccessToken, mockRefreshToken);
+    JwtClaimsVo jwtClaimsVo = new JwtClaimsVo(userIdString, RoleType.USER);
 
-    EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-        authService.refresh(mockRefreshToken));
+    given(jwtResolver.getClaimByJwt(any())).willReturn(jwtClaimsVo);
+    given(redisUtil.getValueByStringKey(any())).willReturn("otherRefreshToken");
 
-    assertEquals(exception.getErrorCode(), ErrorCode.ENTITY_NOT_FOUND);
+    InvalidJwtException exception = assertThrows(InvalidJwtException.class, () ->
+        authService.refresh(refreshRequest));
+
+    assertEquals(ErrorCode.INVALID_INPUT_VALUE, exception.getErrorCode());
   }
 
   @DisplayName("refresh 테스트 성공")
@@ -169,28 +172,30 @@ public class AuthServiceTest {
   void refresh_성공() {
     String mockAccessToken = "accessToken";
     String mockRefreshToken = "refreshToken";
+    String createdAccessToken = "createdAccessToken";
     String userIdString = "1";
+    RefreshRequest refreshRequest = new RefreshRequest(mockAccessToken, mockRefreshToken);
+    JwtClaimsVo jwtClaimsVo = new JwtClaimsVo(userIdString, RoleType.USER);
 
-    given(redisUtil.getValueByStringKey(any())).willReturn(userIdString);
-    given(userRepository.findById(any())).willReturn(stubUserOne());
-    given(jwtProvider.createAccessToken(any())).willReturn(mockAccessToken);
+    given(jwtResolver.getClaimByJwt(any())).willReturn(jwtClaimsVo);
+    given(redisUtil.getValueByStringKey(any())).willReturn(mockRefreshToken);
+    given(jwtProvider.createAccessToken(any(), any())).willReturn(createdAccessToken);
 
-    RefreshResponse result = authService.refresh(mockRefreshToken);
+    RefreshResponse result = authService.refresh(refreshRequest);
 
-    assertEquals(mockAccessToken, result.getAccessToken());
+    assertEquals(createdAccessToken, result.getAccessToken());
   }
 
-  @DisplayName("로그아웃 테스트, 없는 유저로 실패")
+  @DisplayName("로그아웃 테스트, 로그인이 안된 유저 실패")
   @Test
   void logOut_실패() {
-    String mockRefreshToken = "refreshToken";
 
     given(redisUtil.getValueByStringKey(any())).willReturn(null);
 
     NotSignInException exception = assertThrows(NotSignInException.class,
-        () -> authService.logout(mockRefreshToken));
+        () -> authService.logout("1"));
 
-    assertEquals(exception.getErrorCode(), ErrorCode.NOT_SIGN_IN_USER);
+    assertEquals(ErrorCode.NOT_SIGN_IN_USER, exception.getErrorCode());
   }
 
   @DisplayName("로그아웃 성공")
@@ -198,11 +203,11 @@ public class AuthServiceTest {
   void logOut_성공() {
     String mockRefreshToken = "refreshToken";
 
-    given(redisUtil.getValueByStringKey(any())).willReturn("1");
+    given(redisUtil.getValueByStringKey(any())).willReturn(mockRefreshToken);
 
-    MessageResponseDto result = authService.logout(mockRefreshToken);
+    MessageResponseDto result = authService.logout("1");
 
-    assertEquals(result.getMessage(), "로그아웃 성공");
+    assertEquals("로그아웃 성공", result.getMessage());
   }
 
   private SignUpRequest signUpRequestDtoMock() {

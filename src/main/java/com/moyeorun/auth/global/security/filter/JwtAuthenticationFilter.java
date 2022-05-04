@@ -43,7 +43,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
     List<String> skipPath = new ArrayList<>();
     skipPath.add("/");
-    skipPath.add("/api/auth/**");
+    skipPath.add("/api/auth/sign-in");
+    skipPath.add("/api/auth/sign-up");
+    skipPath.add("/api/auth/refresh");
     skipPath.add("/api/user/nickname/duplicate");
     return skipPath.stream()
         .anyMatch(p -> pathMatcher.match(p, request.getRequestURI()));

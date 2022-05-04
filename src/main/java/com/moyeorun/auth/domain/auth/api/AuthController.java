@@ -2,6 +2,7 @@ package com.moyeorun.auth.domain.auth.api;
 
 import com.moyeorun.auth.domain.auth.application.AuthService;
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
+import com.moyeorun.auth.domain.auth.dto.request.RefreshRequest;
 import com.moyeorun.auth.domain.auth.dto.request.SignInRequest;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
@@ -28,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
-  private final HeaderTokenExtractor headerTokenExtractor;
 
   @PostMapping("/sign-up")
   public ResponseEntity<?> singUp(@Valid @RequestBody SignUpRequest signUpRequest) {
@@ -49,20 +49,21 @@ public class AuthController {
     return SuccessResponse.successWidthData(response);
   }
 
-  @GetMapping("/refresh")
-  public ResponseEntity<?> refresh(HttpServletRequest request) {
-    String refreshToken = headerTokenExtractor.extractToken(request);
+  @PostMapping("/refresh")
+  public ResponseEntity<?> refresh(@RequestBody @Valid RefreshRequest refreshRequest) {
 
-    RefreshResponse result = authService.refresh(refreshToken);
+    RefreshResponse result = authService.refresh(refreshRequest);
 
     return SuccessResponse.successWidthData(result);
   }
 
   @GetMapping("/logout")
-  public ResponseEntity<?> logout(HttpServletRequest request) {
-    String refreshToken = headerTokenExtractor.extractToken(request);
+  public ResponseEntity<?> logout() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-    MessageResponseDto response = authService.logout(refreshToken);
+    String userId = auth.getPrincipal().toString();
+
+    MessageResponseDto response = authService.logout(userId);
 
     return SuccessResponse.successWidthData(response);
   }

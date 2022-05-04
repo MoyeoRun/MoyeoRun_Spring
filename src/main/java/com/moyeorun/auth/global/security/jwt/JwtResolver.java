@@ -1,5 +1,6 @@
 package com.moyeorun.auth.global.security.jwt;
 
+import com.moyeorun.auth.domain.auth.domain.contant.RoleType;
 import com.moyeorun.auth.global.config.property.JwtProperty;
 import com.moyeorun.auth.global.security.exception.InvalidJwtException;
 import com.moyeorun.auth.global.security.exception.JwtAuthenticationException;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.management.relation.Role;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +69,20 @@ public class JwtResolver {
       throw new JwtAuthenticationException();
     } catch (IllegalArgumentException e) {
       log.error("JWT 토큰이 잘못됨");
+      throw new InvalidJwtException();
+    }
+  }
+
+  public JwtClaimsVo getClaimByJwt(String accessToken) {
+    try {
+      Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken)
+          .getBody();
+      return new JwtClaimsVo(claims.getSubject(),
+          RoleType.valueOf(claims.get(AUTHORITIES_KEY).toString()));
+    } catch (ExpiredJwtException e) {
+      return new JwtClaimsVo(e.getClaims().getSubject(),
+          RoleType.valueOf(e.getClaims().get(AUTHORITIES_KEY).toString()));
+    } catch (Exception e) {
       throw new InvalidJwtException();
     }
   }

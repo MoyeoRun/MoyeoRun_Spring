@@ -1,6 +1,7 @@
 package com.moyeorun.auth.global.security.jwt;
 
 import com.moyeorun.auth.domain.auth.domain.User;
+import com.moyeorun.auth.domain.auth.domain.contant.RoleType;
 import com.moyeorun.auth.global.config.property.JwtProperty;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -30,26 +31,24 @@ public class JwtProvider {
   }
 
 
-  public String createAccessToken(User user) {
+  public String createAccessToken(String userId, RoleType role) {
     long now = (new Date()).getTime();
     Date accessTokenExpiredIn = new Date(now + ACCESS_TOKEN_EXPIRED_TIME_SECOND * 1000);
     return Jwts.builder()
         .setIssuer(ISSUER)
-        .setSubject(user.getId().toString())
+        .setSubject(userId)
         .setExpiration(accessTokenExpiredIn)
-        .claim(AUTHORITIES_KEY, user.getRole())
+        .claim(AUTHORITIES_KEY, role)
         .signWith(key)
         .compact();
   }
 
-  public String createRefreshToken(User user) {
+  public String createRefreshToken() {
     long now = (new Date()).getTime();
     Date accessTokenExpiredIn = new Date(now + REFRESH_TOKEN_EXPIRED_TIME_SECOND * 1000);
     return Jwts.builder()
         .setIssuer(ISSUER)
-        .setSubject(user.getId().toString())
         .setExpiration(accessTokenExpiredIn)
-        .claim(AUTHORITIES_KEY, user.getRole())
         .signWith(refreshKey)
         .compact();
   }

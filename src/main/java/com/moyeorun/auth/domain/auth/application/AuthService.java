@@ -3,6 +3,7 @@ package com.moyeorun.auth.domain.auth.application;
 import com.moyeorun.auth.domain.auth.dao.UserRepository;
 import com.moyeorun.auth.domain.auth.domain.SnsIdentify;
 import com.moyeorun.auth.domain.auth.domain.User;
+import com.moyeorun.auth.domain.auth.dto.request.RefreshRequest;
 import com.moyeorun.auth.domain.auth.dto.request.SignUpRequest;
 import com.moyeorun.auth.domain.auth.dto.response.RefreshResponse;
 import com.moyeorun.auth.domain.auth.dto.response.SignInResponse;
@@ -13,9 +14,10 @@ import com.moyeorun.auth.domain.auth.exception.DuplicateSnsUserException;
 import com.moyeorun.auth.domain.auth.exception.NotSignInException;
 import com.moyeorun.auth.global.common.response.MessageResponseDto;
 import com.moyeorun.auth.global.config.property.JwtProperty;
-import com.moyeorun.auth.global.error.exception.EntityNotFoundException;
-import com.moyeorun.auth.global.error.exception.InvalidValueException;
+import com.moyeorun.auth.global.security.exception.InvalidJwtException;
+import com.moyeorun.auth.global.security.jwt.JwtClaimsVo;
 import com.moyeorun.auth.global.security.jwt.JwtProvider;
+import com.moyeorun.auth.global.security.jwt.JwtResolver;
 import com.moyeorun.auth.global.util.RedisUtil;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class AuthService {
 
   private final UserRepository userRepository;
   private final JwtProvider jwtProvider;
+  private final JwtResolver jwtResolver;
   private final JwtProperty jwtProperty;
   private final RedisUtil redisUtil;
 
@@ -44,13 +47,12 @@ public class AuthService {
 
     User savedUser = userRepository.save(signUpRequest.toEntity(snsIdentify, email));
 
-    String accessToken = jwtProvider.createAccessToken(savedUser);
-    String refreshToken = jwtProvider.createRefreshToken(savedUser);
+    TokenDto tokenDto = createJwtToken(savedUser);
 
-    redisUtil.setStringWidthExpire(refreshToken, savedUser.getId().toString(),
+    redisUtil.setStringWithExpire(savedUser.getId().toString(), tokenDto.getRefreshToken(),
         jwtProperty.getRefresh_token_expired_time());
 
-    return new SignUpResponse(savedUser, new TokenDto(accessToken, refreshToken));
+    return new SignUpResponse(savedUser, tokenDto);
   }
 
   @Transactional
@@ -58,44 +60,52 @@ public class AuthService {
     Optional<User> findUser = userRepository.findBySnsIdentify(snsIdentify);
 
     if (findUser.isPresent()) {
-      String accessToken = jwtProvider.createAccessToken(findUser.get());
-      String refreshToken = jwtProvider.createRefreshToken(findUser.get());
+      TokenDto tokenDto = createJwtToken(findUser.get());
 
-      redisUtil.setStringWidthExpire(refreshToken, findUser.get().getId().toString(),
+      redisUtil.setStringWithExpire(findUser.get().getId().toString(), tokenDto.getRefreshToken(),
           jwtProperty.getRefresh_token_expired_time());
 
-      return new SignInResponse(findUser.get(), new TokenDto(accessToken, refreshToken));
-    } else {
-      return new SignInResponse();
+      return new SignInResponse(findUser.get(), tokenDto);
     }
+    return new SignInResponse();
   }
 
   @Transactional
-  public RefreshResponse refresh(String token) {
-    String savedId = redisUtil.getValueByStringKey(token);
+  public RefreshResponse refresh(RefreshRequest refreshRequestDto) {
+    JwtClaimsVo jwtClaims = jwtResolver.getClaimByJwt(refreshRequestDto.getAccessToken());
+    String savedRefreshToken = redisUtil.getValueByStringKey(jwtClaims.getUserId());
 
-    if (savedId == null) {
+    if (savedRefreshToken == null) {
       throw new NotSignInException();
     }
 
-    Optional<User> findUser = userRepository.findById(Long.valueOf(savedId));
-
-    if (findUser.isPresent()) {
-      String accessToken = jwtProvider.createAccessToken(findUser.get());
-
-      return new RefreshResponse(accessToken);
+    if (!savedRefreshToken.equals(refreshRequestDto.getRefreshToken())) {
+      System.out.println("saveToken : " + savedRefreshToken + " inputToken: "
+          + refreshRequestDto.getRefreshToken());
+      throw new InvalidJwtException();
     }
-    throw new EntityNotFoundException();
+
+    String accessToken = jwtProvider.createAccessToken(jwtClaims.getUserId(),
+        jwtClaims.getRole());
+
+    return new RefreshResponse(accessToken);
   }
 
   @Transactional
-  public MessageResponseDto logout(String token) {
-    String savedId = redisUtil.getValueByStringKey(token);
+  public MessageResponseDto logout(String userId) {
+    String savedRefreshToken = redisUtil.getValueByStringKey(userId);
 
-    if (savedId == null) {
+    if (savedRefreshToken == null) {
       throw new NotSignInException();
     }
-    redisUtil.deleteByStringKey(token);
+    redisUtil.deleteByStringKey(userId);
     return new MessageResponseDto("로그아웃 성공");
   }
+
+  private TokenDto createJwtToken(User user) {
+    String accessToken = jwtProvider.createAccessToken(user.getId().toString(), user.getRole());
+    String refreshToken = jwtProvider.createRefreshToken();
+    return new TokenDto(accessToken, refreshToken);
+  }
+
 }

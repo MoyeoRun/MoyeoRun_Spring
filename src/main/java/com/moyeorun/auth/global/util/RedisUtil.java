@@ -12,7 +12,7 @@ public class RedisUtil {
 
   private final StringRedisTemplate stringRedisTemplate;
 
-  public void setStringWidthExpire(String key, String value, Long ttl) {
+  public void setStringWithExpire(String key, String value, Long ttl) {
     ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
     valueOperations.set(key, value);
     stringRedisTemplate.expire(key, ttl, TimeUnit.SECONDS);
