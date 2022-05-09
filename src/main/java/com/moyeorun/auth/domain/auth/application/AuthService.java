@@ -80,8 +80,7 @@ public class AuthService {
     }
 
     if (!savedRefreshToken.equals(refreshRequestDto.getRefreshToken())) {
-      System.out.println("saveToken : " + savedRefreshToken + " inputToken: "
-          + refreshRequestDto.getRefreshToken());
+
       throw new InvalidJwtException();
     }
 
