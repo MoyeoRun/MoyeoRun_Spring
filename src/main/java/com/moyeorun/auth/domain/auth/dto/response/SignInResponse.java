@@ -7,7 +7,7 @@ import lombok.Getter;
 public class SignInResponse {
 
   private TokenDto token;
-  private boolean isNewUser;
+  private Boolean isNewUser;
   private Long userId;
 
   public SignInResponse(User user, TokenDto tokenDto) {
