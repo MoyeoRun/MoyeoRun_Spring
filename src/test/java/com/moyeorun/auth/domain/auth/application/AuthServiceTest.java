@@ -116,7 +116,7 @@ public class AuthServiceTest {
 
     SignInResponse result = authService.signIn(snsIdentify);
 
-    assertTrue(result.isNewUser());
+    assertTrue(result.getIsNewUser());
   }
 
   @DisplayName("로그인 성공")
@@ -128,7 +128,7 @@ public class AuthServiceTest {
 
     SignInResponse result = authService.signIn(snsIdentify);
 
-    assertFalse(result.isNewUser());
+    assertFalse(result.getIsNewUser());
     assertEquals(1L, result.getUserId());
   }
 
