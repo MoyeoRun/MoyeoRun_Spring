@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  moyeo-mysql:
+    image: mysql:8
+    container_name: moyeo-mysql
+    ports:
+      - 13308:3306
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      - TZ=Asia/Seoul
+    env_file:
+      - .env
+    volumes:
+      - ./db/mysql:/var/lib/mysql
+  moyeo-redis:
+    image: redis:alpine
+    container_name: moyeo-redis
+    ports:
+      - 16381:6379
+    restart: on-failure
+  moyeo-auth:
+    container_name: moyeo-auth
+    build: .
+    ports:
+      - 8081:8080
+    env_file:
+      - .env
+    depends_on:
+      - moyeo-mysql
+      - moyeo-redis
