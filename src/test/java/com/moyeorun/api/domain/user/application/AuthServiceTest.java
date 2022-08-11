@@ -193,7 +193,7 @@ public class AuthServiceTest {
     given(redisUtil.getValueByStringKey(any())).willReturn(null);
 
     NotSignInException exception = assertThrows(NotSignInException.class,
-        () -> authService.logout("1"));
+        () -> authService.logout(1L));
 
     assertEquals(ErrorCode.NOT_SIGN_IN_USER, exception.getErrorCode());
   }
@@ -205,7 +205,7 @@ public class AuthServiceTest {
 
     given(redisUtil.getValueByStringKey(any())).willReturn(mockRefreshToken);
 
-    MessageResponseDto result = authService.logout("1");
+    MessageResponseDto result = authService.logout(1L);
 
     assertEquals("로그아웃 성공", result.getMessage());
   }

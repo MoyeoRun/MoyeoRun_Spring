@@ -4,6 +4,8 @@ import com.moyeorun.api.domain.user.application.UserService;
 import com.moyeorun.api.domain.user.dto.request.NicknameDuplicateRequest;
 import com.moyeorun.api.domain.user.dto.response.NicknameDuplicateResponse;
 import com.moyeorun.api.domain.user.dto.response.UserResponse;
+import com.moyeorun.api.global.common.AuthUser;
+import com.moyeorun.api.global.common.LoginUser;
 import com.moyeorun.api.global.common.response.SuccessResponse;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,12 +33,8 @@ public class UserController {
   }
 
   @GetMapping("")
-  public ResponseEntity<?> getUser() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-    Long userId = Long.valueOf(auth.getPrincipal().toString());
-
-    UserResponse response = userService.getUser(userId);
+  public ResponseEntity<?> getUser(@LoginUser AuthUser user) {
+    UserResponse response = userService.getUser(user.getUserId());
     return SuccessResponse.successWidthData(response);
   }
 }

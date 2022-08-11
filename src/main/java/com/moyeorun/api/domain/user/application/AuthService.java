@@ -91,13 +91,13 @@ public class AuthService {
   }
 
   @Transactional(readOnly = true)
-  public MessageResponseDto logout(String userId) {
-    String savedRefreshToken = redisUtil.getValueByStringKey(userId);
+  public MessageResponseDto logout(Long userId) {
+    String savedRefreshToken = redisUtil.getValueByStringKey(userId.toString());
 
     if (savedRefreshToken == null) {
       throw new NotSignInException();
     }
-    redisUtil.deleteByStringKey(userId);
+    redisUtil.deleteByStringKey(userId.toString());
     return new MessageResponseDto("로그아웃 성공");
   }
 

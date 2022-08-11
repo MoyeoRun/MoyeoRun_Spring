@@ -8,6 +8,8 @@ import com.moyeorun.api.domain.user.dto.request.SignUpRequest;
 import com.moyeorun.api.domain.user.dto.response.RefreshResponse;
 import com.moyeorun.api.domain.user.dto.response.SignInResponse;
 import com.moyeorun.api.domain.user.dto.response.SignUpResponse;
+import com.moyeorun.api.global.common.AuthUser;
+import com.moyeorun.api.global.common.LoginUser;
 import com.moyeorun.api.global.common.response.MessageResponseDto;
 import com.moyeorun.api.global.common.response.SuccessResponse;
 import javax.validation.Valid;
@@ -56,12 +58,8 @@ public class AuthController {
   }
 
   @GetMapping("/logout")
-  public ResponseEntity<?> logout() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-    String userId = auth.getPrincipal().toString();
-
-    MessageResponseDto response = authService.logout(userId);
+  public ResponseEntity<?> logout(@LoginUser AuthUser user) {
+    MessageResponseDto response = authService.logout(user.getUserId());
 
     return SuccessResponse.successWidthData(response);
   }
