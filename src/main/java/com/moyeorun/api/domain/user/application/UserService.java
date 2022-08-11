@@ -9,6 +9,7 @@ import com.moyeorun.api.global.error.exception.EntityNotFoundException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,11 +17,13 @@ public class UserService {
 
   private final UserRepository userRepository;
 
+  @Transactional(readOnly = true)
   public NicknameDuplicateResponse nicknameDuplicate(NicknameDuplicateRequest duplicateRequest) {
     return new NicknameDuplicateResponse(
         userRepository.existsUserByNickName(duplicateRequest.getNickName()));
   }
 
+  @Transactional(readOnly = true)
   public UserResponse getUser(Long id) {
     Optional<User> findUser = userRepository.findById(id);
 

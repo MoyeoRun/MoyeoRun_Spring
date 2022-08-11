@@ -55,7 +55,7 @@ public class AuthService {
     return new SignUpResponse(savedUser, tokenDto);
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public SignInResponse signIn(SnsIdentify snsIdentify) {
     Optional<User> findUser = userRepository.findBySnsIdentify(snsIdentify);
 
@@ -70,7 +70,7 @@ public class AuthService {
     return new SignInResponse();
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public RefreshResponse refresh(RefreshRequest refreshRequestDto) {
     JwtClaimsVo jwtClaims = jwtResolver.getClaimByJwt(refreshRequestDto.getAccessToken());
     String savedRefreshToken = redisUtil.getValueByStringKey(jwtClaims.getUserId());
@@ -90,7 +90,7 @@ public class AuthService {
     return new RefreshResponse(accessToken);
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public MessageResponseDto logout(String userId) {
     String savedRefreshToken = redisUtil.getValueByStringKey(userId);
 
