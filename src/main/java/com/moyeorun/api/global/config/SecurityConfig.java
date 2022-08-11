@@ -14,6 +14,7 @@ import com.moyeorun.api.global.util.HeaderTokenExtractor;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -39,6 +40,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
   private final ObjectMapper objectMapper;
   private final HeaderTokenExtractor headerTokenExtractor;
+
+  @Value("${spring.profiles.active}")
+  private String activeProfile;
 
   protected ReusableRequestWrapperFilter idTokenExceptionFilter() throws Exception {
     return new ReusableRequestWrapperFilter();
@@ -93,12 +97,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .authenticationEntryPoint(authenticationEntryPoint)
         .accessDeniedHandler(jwtAccessDeniedHandler)
         .and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .authorizeRequests()
-        .antMatchers("/api/auth/**").permitAll()
-        .antMatchers("/api/user/nickname/duplicate").permitAll()
-        .antMatchers("/api/**").authenticated();
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
   }
 }
