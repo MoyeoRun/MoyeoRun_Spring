@@ -21,8 +21,8 @@ services:
     ports:
       - 16381:6379
     restart: on-failure
-  moyeo-auth:
-    container_name: moyeo-auth
+  moyeo-api:
+    container_name: moyeo-api
     build: .
     ports:
       - 8081:8080
