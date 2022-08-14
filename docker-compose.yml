@@ -31,3 +31,34 @@ services:
     depends_on:
       - moyeo-mysql
       - moyeo-redis
+  moyeo-opensearch1:
+    restart: always
+    build:
+      context: ${ADMIN_PATH}/opensearch
+      args:
+        OPENSEARCH_VERSION: ${OPENSEARCH_VERSION}
+    container_name: moyeo-opensearch1
+    environment:
+      cluster.name: moyeo-cluster
+      node.name: moyeo-opensearch1
+      discovery.seed_hosts: moyeo-opensearch1
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+      discovery.type: single-node
+      TZ: Asia/Seoul
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600  
+volumes:
+  opensearch-data:
