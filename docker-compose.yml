@@ -77,5 +77,21 @@ services:
       OPENSEARCH_HOSTS: '["http://moyeo-opensearch1:9200"]'
     depends_on:
       - moyeo-opensearch1
+  moyeo-logstash:
+    build:
+      context: ${ADMIN_PATH}/logstash
+      args: 
+        LOGSTASH_VERSION: ${LOGSTASH_VERSION}
+    volumes:
+      - ${ADMIN_PATH}/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ${ADMIN_PATH}/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+    ports:
+      - "5044:5044"
+      - "5000:5000"
+    environment:
+      LS_JAVA_OPTS: -Xmx1g -Xms1g
+      TZ: Asia/Seoul
+    depends_on:
+      - moyeo-opensearch1
 volumes:
   opensearch-data:
