@@ -60,5 +60,22 @@ services:
     ports:
       - 9200:9200
       - 9600:9600  
+  moyeo-opensearch-dashboards:
+    restart: always
+    build:
+      context: ${ADMIN_PATH}/opensearch-dashboards
+      args:
+        OPENSEARCH_VERSION: ${OPENSEARCH_VERSION}
+    container_name: moyeo-opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_HOSTS: '["http://moyeo-opensearch1:9200"]'
+    depends_on:
+      - moyeo-opensearch1
 volumes:
   opensearch-data:
