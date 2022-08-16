@@ -26,6 +26,8 @@ services:
     build: .
     ports:
       - 8081:8080
+    volumes:
+      - moyeo-auth-data:/usr/share/moyeo-auth:rw,Z
     env_file:
       - .env
     depends_on:
@@ -93,5 +95,20 @@ services:
       TZ: Asia/Seoul
     depends_on:
       - moyeo-opensearch1
+  moyeo-filebeat:
+    build:
+      context: ${ADMIN_PATH}/filebeat
+      args:
+        FILEBEAT_VERSION: ${FILEBEAT_VERSION}
+    # windows DACL
+    entrypoint: "filebeat -e -strict.perms=false"
+    volumes:
+      - ${ADMIN_PATH}/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:rw,Z
+      - filebeat-data:/usr/share/filebeat
+      - moyeo-auth-data:/usr/share/moyeo-auth:rw,Z
+    depends_on:
+      - moyeo-logstash
 volumes:
   opensearch-data:
+  filebeat-data:
+  moyeo-auth-data:
