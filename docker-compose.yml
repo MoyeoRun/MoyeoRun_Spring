@@ -15,86 +15,30 @@ services:
       - .env
     volumes:
       - ./db/mysql:/var/lib/mysql
+    networks:
+      - moyeo-network
   moyeo-redis:
     image: redis:alpine
     container_name: moyeo-redis
     ports:
       - 16381:6379
     restart: on-failure
+    networks:
+      - moyeo-network
   moyeo-auth:
     container_name: moyeo-auth
     build: .
     ports:
       - 8081:8080
     volumes:
-      - moyeo-auth-data:/usr/share/moyeo-auth:rw,Z
+      - moyeo-auth-data:${AUTH_DATA_PATH}:rw,Z
     env_file:
       - .env
     depends_on:
       - moyeo-mysql
       - moyeo-redis
-  moyeo-opensearch1:
-    restart: always
-    build:
-      context: ${ADMIN_PATH}/opensearch
-      args:
-        OPENSEARCH_VERSION: ${OPENSEARCH_VERSION}
-    container_name: moyeo-opensearch1
-    environment:
-      cluster.name: moyeo-cluster
-      node.name: moyeo-opensearch1
-      discovery.seed_hosts: moyeo-opensearch1
-      bootstrap.memory_lock: "true"
-      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
-      DISABLE_INSTALL_DEMO_CONFIG: "true"
-      DISABLE_SECURITY_PLUGIN: "true"
-      discovery.type: single-node
-      TZ: Asia/Seoul
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - opensearch-data:/usr/share/opensearch/data
-    ports:
-      - 9200:9200
-      - 9600:9600  
-  moyeo-opensearch-dashboards:
-    restart: always
-    build:
-      context: ${ADMIN_PATH}/opensearch-dashboards
-      args:
-        OPENSEARCH_VERSION: ${OPENSEARCH_VERSION}
-    container_name: moyeo-opensearch-dashboards
-    ports:
-      - 5601:5601
-    expose:
-      - "5601"
-    environment:
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
-      DISABLE_INSTALL_DEMO_CONFIG: "true"
-      OPENSEARCH_HOSTS: '["http://moyeo-opensearch1:9200"]'
-    depends_on:
-      - moyeo-opensearch1
-  moyeo-logstash:
-    build:
-      context: ${ADMIN_PATH}/logstash
-      args: 
-        LOGSTASH_VERSION: ${LOGSTASH_VERSION}
-    volumes:
-      - ${ADMIN_PATH}/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
-      - ${ADMIN_PATH}/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
-    ports:
-      - "5044:5044"
-      - "5000:5000"
-    environment:
-      LS_JAVA_OPTS: -Xmx1g -Xms1g
-      TZ: Asia/Seoul
-    depends_on:
-      - moyeo-opensearch1
+    networks:
+      - moyeo-network
   moyeo-filebeat:
     build:
       context: ${ADMIN_PATH}/filebeat
@@ -102,13 +46,19 @@ services:
         FILEBEAT_VERSION: ${FILEBEAT_VERSION}
     # windows DACL
     entrypoint: "filebeat -e -strict.perms=false"
+    environment:
+      AUTH_DATA_PATH: ${AUTH_DATA_PATH}
+      LOGSTASH_URL: ${LOGSTASH_URL}
     volumes:
       - ${ADMIN_PATH}/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:rw,Z
       - filebeat-data:/usr/share/filebeat
-      - moyeo-auth-data:/usr/share/moyeo-auth:rw,Z
-    depends_on:
-      - moyeo-logstash
+      - moyeo-auth-data:${AUTH_DATA_PATH}:rw,Z
+    networks:
+      - moyeo-network
 volumes:
-  opensearch-data:
   filebeat-data:
   moyeo-auth-data:
+networks: 
+  moyeo-network:
+    external: false
+    name: moyeo-network
