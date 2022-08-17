@@ -2,7 +2,7 @@ filebeat.inputs:
 - type: filestream
   enabled: true
   paths:
-    - /usr/share/moyeo-auth/log/error/*.log
+    - ${AUTH_DATA_PATH}/log/error/*.log
   parsers:
     - ndjson:
         keys_under_root: true
@@ -27,7 +27,7 @@ filebeat.inputs:
 - type: filestream
   enabled: true
   paths:
-    - /usr/share/moyeo-auth/log/warn/*.log
+    - ${AUTH_DATA_PATH}/log/warn/*.log
   parsers:
     - ndjson:
         keys_under_root: true
@@ -50,7 +50,7 @@ filebeat.inputs:
 - type: filestream
   enabled: true
   paths:
-    - /usr/share/moyeo-auth/log/info/*.log
+    - ${AUTH_DATA_PATH}/log/info/*.log
   parsers:
     - ndjson:
         keys_under_root: true
@@ -58,7 +58,7 @@ filebeat.inputs:
         message_key: log
     - multiline:
         type: pattern
-        pattern: '^\[+\]'
+        pattern: '^\[\d+:\d+:\d+[/]\d+[.]\d+[:]'
         negate: true
         match: after
   processors:
@@ -75,4 +75,4 @@ processors:
 
 output.logstash:
   enabled: true
-  hosts: "moyeo-logstash:5044"
+  hosts: "${LOGSTASH_URL}"
