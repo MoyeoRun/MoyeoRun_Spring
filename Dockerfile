@@ -4,8 +4,8 @@ WORKDIR app
 
 ARG JAV_FILE=./build/libs/*.jar
 
-COPY ${JAV_FILE} ./
+COPY ${JAV_FILE} app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","./auth-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","-Duser.timezone=Asia/Seoul","app.jar"]
