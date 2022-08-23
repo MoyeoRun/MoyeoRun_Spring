@@ -1,0 +1,78 @@
+filebeat.inputs:
+- type: filestream
+  enabled: true
+  paths:
+    - ${AUTH_DATA_PATH}/log/error/*.log
+  parsers:
+    - ndjson:
+        keys_under_root: true
+        overwrite_keys: true
+        message_key: log
+    - multiline:
+        type: pattern
+        # pattern: '^\[\d+:\d+:\d+[/]\d+[.]\d+[:]'
+        pattern: '^\[\d+:\d+:\d+[/]\d+[.]\d+[:]'
+        negate: true
+        match: after
+  processors:
+    - add_tags:
+        tags: [ auth_error_log ]
+        target: "log_type"
+  close_inactive: 24h  # 설정한 시간 이상으로 파일 읽기 작업을 하지 않으면 핸들러 닫는다.
+  ignore_older: 24h  #최종 변경일시로 읽기 대상 제외 지정.
+  clean_inactive: 72h  #clean_inactive에 설정된 시간보다 수정된 시간이 오래되어있으면 registry에서 삭제
+  clean_removed: true
+
+
+- type: filestream
+  enabled: true
+  paths:
+    - ${AUTH_DATA_PATH}/log/warn/*.log
+  parsers:
+    - ndjson:
+        keys_under_root: true
+        overwrite_keys: true
+        message_key: log
+    - multiline:
+        type: pattern
+        pattern: '^\[\d+:\d+:\d+[/]\d+[.]\d+[:]'
+        negate: true
+        match: after
+  processors:
+    - add_tags:
+        tags: [ auth_warn_log ]
+        target: "log_type"
+  close_inactive: 24h
+  ignore_older: 24h 
+  clean_inactive: 72h  
+  clean_removed: true
+
+- type: filestream
+  enabled: true
+  paths:
+    - ${AUTH_DATA_PATH}/log/info/*.log
+  parsers:
+    - ndjson:
+        keys_under_root: true
+        overwrite_keys: true
+        message_key: log
+    - multiline:
+        type: pattern
+        pattern: '^\[\d+:\d+:\d+[/]\d+[.]\d+[:]'
+        negate: true
+        match: after
+  processors:
+    - add_tags:
+        tags: [ auth_info_log ]
+        target: "log_type"
+  close_inactive: 24h  
+  ignore_older: 24h  
+  clean_inactive: 72h  
+  clean_removed: true
+
+processors:
+  - add_locale: ~
+
+output.logstash:
+  enabled: true
+  hosts: "${LOGSTASH_URL}"

@@ -15,19 +15,50 @@ services:
       - .env
     volumes:
       - ./db/mysql:/var/lib/mysql
+    networks:
+      - moyeo-network
   moyeo-redis:
     image: redis:alpine
     container_name: moyeo-redis
     ports:
       - 16381:6379
     restart: on-failure
+    networks:
+      - moyeo-network
   moyeo-api:
     container_name: moyeo-api
     build: .
     ports:
       - 8081:8080
+    volumes:
+      - moyeo-auth-data:${AUTH_DATA_PATH}:rw,Z
     env_file:
       - .env
     depends_on:
       - moyeo-mysql
       - moyeo-redis
+    networks:
+      - moyeo-network
+  moyeo-filebeat:
+    build:
+      context: ${ADMIN_PATH}/filebeat
+      args:
+        FILEBEAT_VERSION: ${FILEBEAT_VERSION}
+    # windows DACL
+    entrypoint: "filebeat -e -strict.perms=false"
+    environment:
+      AUTH_DATA_PATH: ${AUTH_DATA_PATH}
+      LOGSTASH_URL: ${LOGSTASH_URL}
+    volumes:
+      - ${ADMIN_PATH}/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:rw,Z
+      - filebeat-data:/usr/share/filebeat
+      - moyeo-auth-data:${AUTH_DATA_PATH}:rw,Z
+    networks:
+      - moyeo-network
+volumes:
+  filebeat-data:
+  moyeo-auth-data:
+networks: 
+  moyeo-network:
+    external: false
+    name: moyeo-network
