@@ -12,7 +12,7 @@ public enum ErrorCode {
   ENTITY_NOT_FOUND(103, "entity not found", 404),
   EXPIRED_JWT(104, "expired jwt", 401),
   NOT_SIGN_IN_USER(105, "not sign in user request", 401),
-  
+  ALREADY_PARTICIPATE_ROOM(106,"already participate room",400),
 
   NOT_SUPPORT_METHOD(198, "not support method", 400),
   INTERNAL_SERVER_ERROR(199, "internal server error", 500),
