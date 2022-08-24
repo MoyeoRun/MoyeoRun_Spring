@@ -13,6 +13,11 @@ public enum ErrorCode {
   EXPIRED_JWT(104, "expired jwt", 401),
   NOT_SIGN_IN_USER(105, "not sign in user request", 401),
   ALREADY_PARTICIPATE_ROOM(106,"already participate room",400),
+  NOT_ALLOW_RESERVATION_REQUEST(107,"not allow reservation Request", 400),
+  ALREADY_RESERVATION_ROOM(108,"already reservation room",400),
+  NOT_RESERVATION_ROOM(109, "not reservation room", 400),
+  NOT_ALLOW_HOST_USER_REQUEST(110, "host user not allow", 400),
+
 
   NOT_SUPPORT_METHOD(198, "not support method", 400),
   INTERNAL_SERVER_ERROR(199, "internal server error", 500),

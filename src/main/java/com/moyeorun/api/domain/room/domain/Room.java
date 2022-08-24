@@ -1,6 +1,8 @@
 package com.moyeorun.api.domain.room.domain;
 
 import com.moyeorun.api.domain.model.BaseTimeEntity;
+import com.moyeorun.api.domain.room.exception.NotAllowHostSelfReqeustException;
+import com.moyeorun.api.domain.room.exception.NotAllowReservationRequestException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,5 +74,32 @@ public class Room extends BaseTimeEntity {
 
   public void close(){
     this.roomStatus = RoomStatus.CLOSE;
+  }
+
+  public void validateReservation(LocalDateTime currentTime, Long requestUserId){
+    validateReservationTime(currentTime);
+    validateIsHost(requestUserId);
+  }
+
+  private void validateReservationTime(LocalDateTime currentTime){
+    LocalDateTime canReservationTime = this.startTime.minusHours(1);
+    if(currentTime.isAfter(canReservationTime)){
+      throw new NotAllowReservationRequestException();
+    }
+  }
+
+  private void validateIsHost(Long requestId){
+    if(hostId.equals(requestId)){
+      throw new NotAllowHostSelfReqeustException();
+    }
+  }
+
+  public void validationJoinTime(LocalDateTime currentTime){
+    LocalDateTime canJoinTime = this.startTime.plusHours(1);
+    if(currentTime.isAfter(canJoinTime)){
+      /*
+      *  불가능.
+      */
+    }
   }
 }
