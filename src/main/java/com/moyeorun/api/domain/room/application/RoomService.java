@@ -8,8 +8,10 @@ import com.moyeorun.api.domain.room.domain.RoomReservation;
 import com.moyeorun.api.domain.room.domain.Running;
 import com.moyeorun.api.domain.room.dto.request.CreateRoomRequest;
 import com.moyeorun.api.domain.room.dto.response.CreateRoomResponse;
+import com.moyeorun.api.domain.room.exception.AlreadyJoinRoomException;
 import com.moyeorun.api.domain.room.exception.AlreadyReservationException;
-import com.moyeorun.api.domain.room.exception.NotReservationRoomException;
+import com.moyeorun.api.domain.room.exception.RequireJoinException;
+import com.moyeorun.api.domain.room.exception.RequireReservationException;
 import com.moyeorun.api.domain.scheduler.application.RoomJobService;
 import com.moyeorun.api.domain.user.dao.UserRepository;
 import com.moyeorun.api.domain.user.domain.User;
@@ -31,8 +33,7 @@ public class RoomService {
   private final RoomReservationRepository roomReservationRepository;
   @Transactional
   public CreateRoomResponse createRoom(CreateRoomRequest dto, Long userId){
-    User findUser = userRepository.findById(userId)
-        .orElseThrow(EntityNotFoundException::new);
+    User findUser = findUserById(userId);
 
     policy.constraintRoomCheck(findUser);
 
@@ -49,11 +50,8 @@ public class RoomService {
 
   @Transactional
   public void reserve(Long userId, Long roomId){
-    User findUser = userRepository.findById(userId)
-        .orElseThrow(EntityNotFoundException::new);
-
-    Room room = roomRepository.findById(roomId)
-        .orElseThrow(EntityNotFoundException::new);
+    User findUser = findUserById(userId);
+    Room room = findRoomById(roomId);
 
     room.validateReservation(LocalDateTime.now(), userId);
 
@@ -69,17 +67,56 @@ public class RoomService {
 
   @Transactional
   public void cancelReservation(Long userId, Long roomId){
-    User findUser = userRepository.findById(userId)
-        .orElseThrow(EntityNotFoundException::new);
-
-    Room room = roomRepository.findById(roomId)
-        .orElseThrow(EntityNotFoundException::new);
+    User findUser =  findUserById(userId);
+    Room room = findRoomById(roomId);
 
     room.validateReservation(LocalDateTime.now(), userId);
 
     RoomReservation roomReservation = roomReservationRepository.findByUserAndRoom(findUser, room)
-        .orElseThrow(NotReservationRoomException::new);
+        .orElseThrow(RequireReservationException::new);
 
     roomReservationRepository.delete(roomReservation);
   }
+
+  @Transactional
+  public void joinRoom(Long userId, Long roomId){
+    User findUser = findUserById(userId);
+    Room room = findRoomById(roomId);
+
+    room.validateJoin(LocalDateTime.now(), userId);
+
+    if(runningRepository.existsByUserAndRoom(findUser,room)){
+      throw new AlreadyJoinRoomException();
+    }
+
+    policy.constraintRoomCheck(findUser);
+
+    runningRepository.save(Running.builder()
+            .user(findUser)
+            .room(room)
+        .build());
+  }
+
+  @Transactional
+  public void joinCancel(Long userId, Long roomId){
+    User findUser = findUserById(userId);
+    Room room = findRoomById(roomId);
+
+    room.validateJoin(LocalDateTime.now(), userId);
+    Running running = runningRepository.findByUserAndRoom(findUser, room)
+        .orElseThrow(RequireJoinException::new);
+
+    runningRepository.delete(running);
+  }
+
+  private User findUserById(Long userId){
+    return userRepository.findById(userId)
+        .orElseThrow(EntityNotFoundException::new);
+  }
+
+  private Room findRoomById(Long roomId){
+    return roomRepository.findById(roomId)
+        .orElseThrow(EntityNotFoundException::new);
+  }
+
 }

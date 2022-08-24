@@ -15,10 +15,11 @@ public enum ErrorCode {
   ALREADY_PARTICIPATE_ROOM(106,"already participate room",400),
   NOT_ALLOW_RESERVATION_REQUEST(107,"not allow reservation Request", 400),
   ALREADY_RESERVATION_ROOM(108,"already reservation room",400),
-  NOT_RESERVATION_ROOM(109, "not reservation room", 400),
+  REQUIRE_RESERVATION_ROOM(109, "not reservation room", 400),
   NOT_ALLOW_HOST_USER_REQUEST(110, "host user not allow", 400),
-
-
+  NOT_ALLOW_JOIN_REQUEST(111,"not allow join Request", 400),
+  ALREADY_JOIN_ROOM(112,"already join room",400),
+  REQUIRE_JOIN_ROOM(113, "require join room",400),
   NOT_SUPPORT_METHOD(198, "not support method", 400),
   INTERNAL_SERVER_ERROR(199, "internal server error", 500),
   //idToken

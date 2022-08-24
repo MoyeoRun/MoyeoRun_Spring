@@ -47,4 +47,18 @@ public class RoomController {
     roomService.cancelReservation(user.getUserId(), roomId);
     return SuccessResponse.successWidthData(new MessageResponseDto("방 예약을 취소했습니다."));
   }
+
+  @PostMapping("/api/room/{id}/join")
+  public ResponseEntity<?> join(@LoginUser AuthUser user,
+      @PathVariable("id") @NotNull @Min(1) Long roomId){
+    roomService.joinRoom(user.getUserId(), roomId);
+    return SuccessResponse.successWidthData(new MessageResponseDto("방 참여 성공"));
+  }
+
+  @DeleteMapping("/api/room/{id}/join")
+  public ResponseEntity<?> cancelJoin(@LoginUser AuthUser user,
+      @PathVariable("id") @NotNull @Min(1) Long roomId){
+    roomService.joinCancel(user.getUserId(), roomId);
+    return SuccessResponse.successWidthData(new MessageResponseDto("방 참여 취소 성공"));
+  }
 }

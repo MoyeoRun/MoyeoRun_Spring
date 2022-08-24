@@ -12,10 +12,13 @@ import com.moyeorun.api.domain.room.dao.RunningRepository;
 import com.moyeorun.api.domain.room.domain.Room;
 import com.moyeorun.api.domain.room.domain.RoomReservation;
 import com.moyeorun.api.domain.room.domain.RoomStatus;
+import com.moyeorun.api.domain.room.exception.AlreadyJoinRoomException;
 import com.moyeorun.api.domain.room.exception.AlreadyReservationException;
 import com.moyeorun.api.domain.room.exception.NotAllowHostSelfReqeustException;
+import com.moyeorun.api.domain.room.exception.NotAllowJoinRequestException;
 import com.moyeorun.api.domain.room.exception.NotAllowReservationRequestException;
-import com.moyeorun.api.domain.room.exception.NotReservationRoomException;
+import com.moyeorun.api.domain.room.exception.RequireJoinException;
+import com.moyeorun.api.domain.room.exception.RequireReservationException;
 import com.moyeorun.api.domain.scheduler.job.RoomCloseJob;
 import com.moyeorun.api.domain.user.dao.UserRepository;
 import com.moyeorun.api.domain.user.domain.User;
@@ -54,6 +57,13 @@ class RoomServiceTest {
   Room generalRoom;
   final Long hostId = 2L;
   final Long roomId = 1L;
+
+  final Room remain30MinRoom = Room.builder()
+      .startTime(LocalDateTime.now().plusMinutes(30))
+      .hostId(hostId)
+      .name("방이름")
+      .build();
+
   @BeforeEach
   void setUp() {
     mockUser = UserMockBuilder.ofOptional();
@@ -64,6 +74,7 @@ class RoomServiceTest {
         .hostId(hostId)
         .name("방이름")
         .build();
+
   }
 
   @Test
@@ -124,7 +135,7 @@ class RoomServiceTest {
     given(roomRepository.findById(roomId)).willReturn(Optional.of(generalRoom));
     given(roomReservationRepository.findByUserAndRoom(any(), any())).willReturn(Optional.empty());
 
-    assertThrows(NotReservationRoomException.class,
+    assertThrows(RequireReservationException.class,
         () -> roomService.cancelReservation(userId, roomId));
   }
 
@@ -135,10 +146,54 @@ class RoomServiceTest {
         .build();
     given(userRepository.findById(userId)).willReturn(mockUser);
     given(roomRepository.findById(roomId)).willReturn(Optional.of(generalRoom));
-    given(roomReservationRepository.findByUserAndRoom(any(), any())).willReturn(Optional.of(reservation));
+    given(roomReservationRepository.findByUserAndRoom(any(), any())).willReturn(
+        Optional.of(reservation));
 
-    roomService.cancelReservation(userId,roomId);
+    roomService.cancelReservation(userId, roomId);
 
-    verify(roomReservationRepository,times(1)).delete(reservation);
+    verify(roomReservationRepository, times(1)).delete(reservation);
+  }
+
+  @Test
+  @DisplayName("방 참여 시 시간 제한으로 실패")
+  public void join_time_limit_fail() throws Exception {
+    LocalDateTime after90MinStartTime = LocalDateTime.now().plusMinutes(90);
+    Room room = Room.builder().hostId(2L).startTime(after90MinStartTime)
+        .build();
+    given(userRepository.findById(userId)).willReturn(mockUser);
+    given(roomRepository.findById(roomId)).willReturn(Optional.of(room));
+
+    assertThrows(NotAllowJoinRequestException.class, () -> roomService.joinRoom(userId, roomId));
+  }
+
+  @Test
+  @DisplayName("방 참여 시 이미 참여한 방이여서 실패")
+  public void join_already_fail() throws Exception {
+    given(userRepository.findById(userId)).willReturn(mockUser);
+    given(roomRepository.findById(roomId)).willReturn(Optional.of(remain30MinRoom));
+    given(runningRepository.existsByUserAndRoom(any(), any())).willReturn(true);
+
+    assertThrows(AlreadyJoinRoomException.class, ()-> roomService.joinRoom(userId,roomId));
+  }
+
+  @Test
+  @DisplayName("방 참여 성공")
+  public void join_success() throws Exception {
+    given(userRepository.findById(userId)).willReturn(mockUser);
+    given(roomRepository.findById(roomId)).willReturn(Optional.of(remain30MinRoom));
+    given(runningRepository.existsByUserAndRoom(any(), any())).willReturn(false);
+
+    roomService.joinRoom(userId,roomId);
+    verify(runningRepository,times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("방 참여 취소 시 참여하지 않은 방 실패")
+  public void joinCancel_not_joined_fail() throws Exception {
+    given(userRepository.findById(userId)).willReturn(mockUser);
+    given(roomRepository.findById(roomId)).willReturn(Optional.of(remain30MinRoom));
+    given(runningRepository.findByUserAndRoom(any(),any())).willReturn(Optional.empty());
+
+    assertThrows(RequireJoinException.class,()-> roomService.joinCancel(userId,roomId));
   }
 }
