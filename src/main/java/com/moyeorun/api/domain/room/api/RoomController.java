@@ -1,8 +1,10 @@
 package com.moyeorun.api.domain.room.api;
 
+import com.moyeorun.api.domain.room.application.RoomGetService;
 import com.moyeorun.api.domain.room.application.RoomService;
 import com.moyeorun.api.domain.room.dto.request.CreateRoomRequest;
 import com.moyeorun.api.domain.room.dto.response.CreateRoomResponse;
+import com.moyeorun.api.domain.room.dto.response.RoomResponse;
 import com.moyeorun.api.global.common.AuthUser;
 import com.moyeorun.api.global.common.LoginUser;
 import com.moyeorun.api.global.common.response.MessageResponseDto;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
 
   private final RoomService roomService;
+  private final RoomGetService roomGetService;
+  @GetMapping("/api/room/{id}")
+  public ResponseEntity<?> getOne(@PathVariable("id") Long roomId){
+    RoomResponse result = roomGetService.getOne(roomId);
+    return SuccessResponse.successWidthData(result);
+  }
+
 
   @PostMapping("/api/room")
   public ResponseEntity<?> createRoom(@LoginUser AuthUser user,
