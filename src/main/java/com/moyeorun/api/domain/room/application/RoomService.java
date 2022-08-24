@@ -6,6 +6,7 @@ import com.moyeorun.api.domain.room.domain.Room;
 import com.moyeorun.api.domain.room.domain.Running;
 import com.moyeorun.api.domain.room.dto.request.CreateRoomRequest;
 import com.moyeorun.api.domain.room.dto.response.CreateRoomResponse;
+import com.moyeorun.api.domain.scheduler.application.RoomJobService;
 import com.moyeorun.api.domain.user.dao.UserRepository;
 import com.moyeorun.api.domain.user.domain.User;
 import com.moyeorun.api.global.error.exception.EntityNotFoundException;
@@ -21,7 +22,7 @@ public class RoomService {
   private final RoomRepository roomRepository;
   private final RunningRepository runningRepository;
   private final OneRoomParticipatePolicy policy;
-
+  private final RoomJobService roomJobService;
   @Transactional
   public CreateRoomResponse createRoom(CreateRoomRequest dto, Long userId){
     User findUser = userRepository.findById(userId)
@@ -35,6 +36,9 @@ public class RoomService {
             .user(findUser)
             .room(room)
         .build());
+
+    roomJobService.registerCloseRoomJob(room.getId(), room.getStartTime());
     return new CreateRoomResponse("방 생성 성공", room.getId());
   }
+
 }

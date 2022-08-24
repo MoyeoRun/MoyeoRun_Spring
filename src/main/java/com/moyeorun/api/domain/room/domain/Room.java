@@ -70,4 +70,7 @@ public class Room extends BaseTimeEntity {
     this.roomStatus = roomStatus;
   }
 
+  public void close(){
+    this.roomStatus = RoomStatus.CLOSE;
+  }
 }
