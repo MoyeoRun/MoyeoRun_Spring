@@ -155,16 +155,30 @@ class RoomServiceTest {
   }
 
   @Test
-  @DisplayName("방 참여 시 시간 제한으로 실패")
-  public void join_time_limit_fail() throws Exception {
-    LocalDateTime after90MinStartTime = LocalDateTime.now().plusMinutes(90);
-    Room room = Room.builder().hostId(2L).startTime(after90MinStartTime)
+  @DisplayName("방 참여 시 시간 제한으로 실패(최대)")
+  public void join_time_limit_max_fail() throws Exception {
+    LocalDateTime after61MinStartTime = LocalDateTime.now().plusMinutes(61);
+    Room room = Room.builder().hostId(2L).startTime(after61MinStartTime)
         .build();
     given(userRepository.findById(userId)).willReturn(mockUser);
     given(roomRepository.findById(roomId)).willReturn(Optional.of(room));
 
     assertThrows(NotAllowJoinRequestException.class, () -> roomService.joinRoom(userId, roomId));
   }
+
+  @Test
+  @DisplayName("방 참여 시 시간 제한으로 실패(최소)")
+  public void join_time_limit_min_fail() throws Exception {
+    LocalDateTime after9MinStartTime = LocalDateTime.now().plusMinutes(9);
+    Room room = Room.builder().hostId(2L).startTime(after9MinStartTime)
+        .build();
+    given(userRepository.findById(userId)).willReturn(mockUser);
+    given(roomRepository.findById(roomId)).willReturn(Optional.of(room));
+
+    assertThrows(NotAllowJoinRequestException.class, () -> roomService.joinRoom(userId, roomId));
+
+  }
+
 
   @Test
   @DisplayName("방 참여 시 이미 참여한 방이여서 실패")

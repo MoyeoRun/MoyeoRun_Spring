@@ -101,8 +101,9 @@ public class Room extends BaseTimeEntity {
   }
 
   private void validationJoinTime(LocalDateTime currentTime) {
-    LocalDateTime canJoinTime = this.startTime.minusHours(1);
-    if (currentTime.isBefore(canJoinTime)) {
+    LocalDateTime canJoinTimeOneHour = this.startTime.minusHours(1);
+    LocalDateTime canJoinTimeOneMin = this.startTime.minusMinutes(10);
+    if (currentTime.isBefore(canJoinTimeOneHour) || currentTime.isAfter(canJoinTimeOneMin)) {
       throw new NotAllowJoinRequestException();
     }
   }
