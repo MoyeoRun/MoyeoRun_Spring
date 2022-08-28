@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RoomReservationRepository extends JpaRepository<RoomReservation, Long> {
   Boolean existsByUserAndRoom(User user, Room room);
+
+  Long countByRoom(Room room);
   Optional<RoomReservation> findByUserAndRoom(User user, Room room);
   List<RoomReservation> findByRoom(Room room);
 }

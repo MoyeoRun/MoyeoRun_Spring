@@ -20,6 +20,7 @@ public enum ErrorCode {
   NOT_ALLOW_JOIN_REQUEST(111,"not allow join Request", 400),
   ALREADY_JOIN_ROOM(112,"already join room",400),
   REQUIRE_JOIN_ROOM(113, "require join room",400),
+  LIMIT_ROOM_USER_COUNT(114,"limit user count", 409),
   NOT_SUPPORT_METHOD(198, "not support method", 400),
   INTERNAL_SERVER_ERROR(199, "internal server error", 500),
   //idToken

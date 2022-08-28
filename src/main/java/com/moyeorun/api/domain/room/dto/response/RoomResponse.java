@@ -31,11 +31,13 @@ public class RoomResponse {
   private LocalDateTime updatedAt;
   private List<RoomUserResponse> userList;
 
+  private int currentUserCount;
+
   @Builder
   public RoomResponse(Long roomId, String name, String thumbnailImage, int targetDistance,
       int limitUserCount, int limitTime, String targetPace, LocalDateTime startTime, Long hostId,
       RoomStatus roomStatus, LocalDateTime createdAt, LocalDateTime updatedAt,
-      List<RoomUserResponse> userList) {
+      List<RoomUserResponse> userList, int currentUserCount) {
     this.roomId = roomId;
     this.name = name;
     this.thumbnailImage = thumbnailImage;
@@ -49,6 +51,7 @@ public class RoomResponse {
     this.userList = userList;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.currentUserCount = currentUserCount;
   }
 
   public static RoomResponse toDetailReservation(Room room, List<User> userList) {
@@ -78,4 +81,17 @@ public class RoomResponse {
         .build();
   }
 
+  public static RoomResponse toListDto(Room room){
+    return RoomResponse.builder()
+        .roomId(room.getId())
+        .name(room.getName())
+        .thumbnailImage(room.getThumbnailImage())
+        .targetPace(room.getTargetPace())
+        .targetDistance(room.getTargetDistance())
+        .limitTime(room.getLimitTime())
+        .startTime(room.getStartTime())
+        .limitUserCount(room.getLimitUserCount())
+//        .currentUserCount(room.getCurrentUserCount())
+        .build();
+  }
 }

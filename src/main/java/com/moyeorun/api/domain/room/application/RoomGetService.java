@@ -21,24 +21,25 @@ public class RoomGetService {
   private final RoomReservationRepository roomReservationRepository;
 
   @Transactional(readOnly = true)
-  public RoomResponse getOne(Long roomId){
+  public RoomResponse getOne(Long roomId) {
     Room findRoom = findRoomById(roomId);
-    if(isReservation(findRoom.getStartTime())){
+    if (isReservation(findRoom.getStartTime())) {
       List<RoomReservation> reservationList = roomReservationRepository.findByRoom(findRoom);
       List<User> users = reservationList.stream().map(RoomReservation::getUser).toList();
       return RoomResponse.toDetailReservation(findRoom, users);
-    }else{
+    } else {
       return RoomResponse.toDetailJoin(findRoom);
     }
   }
 
 
-  private Boolean isReservation(LocalDateTime startTime){
+  private Boolean isReservation(LocalDateTime startTime) {
     LocalDateTime reservationTime = startTime.minusHours(1);
     LocalDateTime currentTime = LocalDateTime.now();
     return reservationTime.isAfter(currentTime);
   }
-  private Room findRoomById(Long roomId){
+
+  private Room findRoomById(Long roomId) {
     return roomRepository.findById(roomId)
         .orElseThrow(EntityNotFoundException::new);
   }

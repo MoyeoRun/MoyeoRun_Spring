@@ -1,12 +1,19 @@
 package com.moyeorun.api.domain.room.domain;
 
 import com.moyeorun.api.domain.model.BaseTimeEntity;
+import com.moyeorun.api.domain.room.exception.AlreadyJoinRoomException;
+import com.moyeorun.api.domain.room.exception.AlreadyReservationException;
 import com.moyeorun.api.domain.room.exception.NotAllowHostSelfReqeustException;
 import com.moyeorun.api.domain.room.exception.NotAllowJoinRequestException;
 import com.moyeorun.api.domain.room.exception.NotAllowReservationRequestException;
+import com.moyeorun.api.domain.room.exception.RequireJoinException;
+import com.moyeorun.api.domain.room.exception.RequireReservationException;
+import com.moyeorun.api.domain.user.domain.User;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -56,8 +63,11 @@ public class Room extends BaseTimeEntity {
   @Column(nullable = false)
   private RoomStatus roomStatus;
 
-  @OneToMany(mappedBy = "room")
+  @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Running> runningList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<RoomReservation> reservationList = new ArrayList<>();
 
   @Builder
   public Room(String name, int targetDistance, int limitUserCount, int limitTime, String targetPace,
@@ -71,6 +81,58 @@ public class Room extends BaseTimeEntity {
     this.thumbnailImage = thumbnailImage;
     this.hostId = hostId;
     this.roomStatus = roomStatus;
+  }
+
+  public void initRunner(Running running) {
+    this.runningList.add(running);
+  }
+
+  public void addReservation(User user) {
+    if (isAlreadyReservationUser(user)) {
+      throw new AlreadyReservationException();
+    }
+    this.reservationList.add(RoomReservation.builder()
+        .room(this)
+        .user(user)
+        .build());
+  }
+
+  private boolean isAlreadyReservationUser(User user) {
+    Optional<RoomReservation> result = this.reservationList.stream().filter(roomReservation ->
+        roomReservation.getUser().equals(user)
+    ).findAny();
+    return result.isPresent();
+  }
+
+  public void cancelReservation(User user) {
+    if (!isAlreadyReservationUser(user)) {
+      throw new RequireReservationException();
+    }
+    reservationList.removeIf(reservation -> reservation.getUser().equals(user));
+  }
+
+  private boolean isAlreadyJoinRoomUser(User user) {
+    Optional<Running> result = this.runningList.stream().filter(running ->
+        running.getUser().equals(user)
+    ).findAny();
+    return result.isPresent();
+  }
+
+  public void joinRunner(User user) {
+    if (isAlreadyJoinRoomUser(user)) {
+      throw new AlreadyJoinRoomException();
+    }
+    this.runningList.add(Running.builder()
+        .room(this)
+        .user(user)
+        .build());
+  }
+
+  public void removeRunner(User user) {
+    if (!isAlreadyJoinRoomUser(user)) {
+      throw new RequireJoinException();
+    }
+    this.runningList.removeIf(running -> running.getUser().equals(user));
   }
 
   public void close() {

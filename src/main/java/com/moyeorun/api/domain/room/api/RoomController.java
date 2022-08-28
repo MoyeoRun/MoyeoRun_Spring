@@ -35,7 +35,6 @@ public class RoomController {
     return SuccessResponse.successWidthData(result);
   }
 
-
   @PostMapping("/api/room")
   public ResponseEntity<?> createRoom(@LoginUser AuthUser user,
       @RequestBody @Valid CreateRoomRequest request
