@@ -4,6 +4,7 @@ import com.moyeorun.api.domain.room.application.RoomGetService;
 import com.moyeorun.api.domain.room.application.RoomService;
 import com.moyeorun.api.domain.room.dto.request.CreateRoomRequest;
 import com.moyeorun.api.domain.room.dto.response.CreateRoomResponse;
+import com.moyeorun.api.domain.room.dto.response.RoomPagingResponse;
 import com.moyeorun.api.domain.room.dto.response.RoomResponse;
 import com.moyeorun.api.global.common.AuthUser;
 import com.moyeorun.api.global.common.LoginUser;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -29,8 +31,33 @@ public class RoomController {
 
   private final RoomService roomService;
   private final RoomGetService roomGetService;
+
+  @GetMapping("/api/room/current")
+  public ResponseEntity<?> getCurrentJoinRoom(@LoginUser AuthUser user){
+    RoomResponse result = roomGetService.getCurrentJoinRoom(user.getUserId());
+    return SuccessResponse.successWidthData(result);
+  }
+
+
+  @GetMapping("/api/room/open")
+  public ResponseEntity<?> getOpenList(
+      @RequestParam(value = "lastId", defaultValue = "0", required = false) Long lastId,
+      @RequestParam(value = "count", defaultValue = "20", required = false) int count
+  ) {
+    RoomPagingResponse result = roomGetService.getReservationPaging(lastId, count);
+    return SuccessResponse.successWidthData(result);
+  }
+
+  @GetMapping("/api/room/realtime")
+  public ResponseEntity<?> getReadTimeList(
+      @RequestParam(value = "lastId", defaultValue = "0", required = false) Long lastId,
+      @RequestParam(value = "count", defaultValue = "20", required = false) int count
+  ) {
+    RoomPagingResponse result = roomGetService.getRealTimePaging(lastId, count);
+    return SuccessResponse.successWidthData(result);
+  }
   @GetMapping("/api/room/{id}")
-  public ResponseEntity<?> getOne(@PathVariable("id") Long roomId){
+  public ResponseEntity<?> getOne(@PathVariable("id") Long roomId) {
     RoomResponse result = roomGetService.getOne(roomId);
     return SuccessResponse.successWidthData(result);
   }
@@ -59,14 +86,14 @@ public class RoomController {
 
   @PostMapping("/api/room/{id}/join")
   public ResponseEntity<?> join(@LoginUser AuthUser user,
-      @PathVariable("id") @NotNull @Min(1) Long roomId){
+      @PathVariable("id") @NotNull @Min(1) Long roomId) {
     roomService.joinRoom(user.getUserId(), roomId);
     return SuccessResponse.successWidthData(new MessageResponseDto("방 참여 성공"));
   }
 
   @DeleteMapping("/api/room/{id}/join")
   public ResponseEntity<?> cancelJoin(@LoginUser AuthUser user,
-      @PathVariable("id") @NotNull @Min(1) Long roomId){
+      @PathVariable("id") @NotNull @Min(1) Long roomId) {
     roomService.joinCancel(user.getUserId(), roomId);
     return SuccessResponse.successWidthData(new MessageResponseDto("방 참여 취소 성공"));
   }
