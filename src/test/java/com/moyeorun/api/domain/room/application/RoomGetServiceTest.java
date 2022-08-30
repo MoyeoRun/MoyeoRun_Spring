@@ -65,7 +65,7 @@ class RoomGetServiceTest {
 
     roomGetService.getOne(roomId);
 
-    verify(roomReservationRepository,times(1)).findByRoom(After30MinStartRoom);
+    verify(roomReservationRepository,times(0)).findByRoom(After30MinStartRoom);
 
   }
 
