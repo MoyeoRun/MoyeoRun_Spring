@@ -13,11 +13,13 @@ import com.moyeorun.api.domain.room.exception.LimitRoomUserCountException;
 import com.moyeorun.api.domain.room.exception.NotAllowHostSelfReqeustException;
 import com.moyeorun.api.domain.room.exception.NotAllowJoinRequestException;
 import com.moyeorun.api.domain.room.exception.NotAllowReservationRequestException;
+import com.moyeorun.api.domain.room.exception.NotDeleteRoomTimeException;
 import com.moyeorun.api.domain.room.exception.RequireJoinException;
 import com.moyeorun.api.domain.room.exception.RequireReservationException;
 import com.moyeorun.api.domain.scheduler.job.RoomCloseJob;
 import com.moyeorun.api.domain.user.dao.UserRepository;
 import com.moyeorun.api.domain.user.domain.User;
+import com.moyeorun.api.global.error.exception.AuthorizationFailException;
 import com.moyeorun.api.setup.domain.UserMockBuilder;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -252,5 +254,32 @@ class RoomServiceTest {
     given(roomRepository.findWithRunningById(roomId)).willReturn(Optional.of(notJoinRoom));
 
     assertThrows(RequireJoinException.class, () -> roomService.joinCancel(userId, roomId));
+  }
+
+  @Test
+  @DisplayName("방 삭제시 호스트가 아닌 요청으로 실패")
+  public void roomDelete_not_host() throws Exception {
+    Room room = Room.builder()
+        .startTime(LocalDateTime.now().plusMinutes(30))
+        .hostId(2L)
+        .build();
+
+    given(roomRepository.findById(roomId)).willReturn(Optional.of(room));
+
+    assertThrows(AuthorizationFailException.class, () ->
+        roomService.deleteRoom(1L, roomId));
+  }
+
+  @Test
+  @DisplayName("방 삭제시 10분 이내의 방은 요청 실패.")
+  public void roomDelete_Time_limit() throws Exception {
+    // 5분뒤 시작하는 방.
+    Room room = Room.builder()
+        .startTime(LocalDateTime.now().plusMinutes(5))
+        .hostId(userId)
+        .build();
+    given(roomRepository.findById(roomId)).willReturn(Optional.of(room));
+    assertThrows(NotDeleteRoomTimeException.class, () ->
+        roomService.deleteRoom(userId, roomId));
   }
 }

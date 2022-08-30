@@ -6,11 +6,14 @@ import com.moyeorun.api.domain.room.domain.Running;
 import com.moyeorun.api.domain.room.dto.request.CreateRoomRequest;
 import com.moyeorun.api.domain.room.dto.response.CreateRoomResponse;
 import com.moyeorun.api.domain.room.exception.LimitRoomUserCountException;
+import com.moyeorun.api.domain.room.exception.NotDeleteRoomTimeException;
 import com.moyeorun.api.domain.scheduler.application.RoomJobService;
 import com.moyeorun.api.domain.user.dao.UserRepository;
 import com.moyeorun.api.domain.user.domain.User;
+import com.moyeorun.api.global.error.exception.AuthorizationFailException;
 import com.moyeorun.api.global.error.exception.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,6 +95,24 @@ public class RoomService {
 
     room.removeRunner(findUser);
   }
+
+  @Transactional
+  public void deleteRoom(Long userId, Long roomId) {
+    Room findRoom = roomRepository.findById(roomId)
+        .orElseThrow(EntityNotFoundException::new);
+
+    if (!findRoom.getHostId().equals(userId)) {
+      throw new AuthorizationFailException();
+    }
+
+    LocalDateTime canDeleteTime = findRoom.getStartTime().minusMinutes(10);
+    if(LocalDateTime.now().isAfter(canDeleteTime)){
+      throw new NotDeleteRoomTimeException();
+    }
+
+    roomRepository.delete(findRoom);
+  }
+
 
   private User findUserById(Long userId) {
     return userRepository.findById(userId)

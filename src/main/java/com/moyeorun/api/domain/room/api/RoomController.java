@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -96,5 +97,11 @@ public class RoomController {
       @PathVariable("id") @NotNull @Min(1) Long roomId) {
     roomService.joinCancel(user.getUserId(), roomId);
     return SuccessResponse.successWidthData(new MessageResponseDto("방 참여 취소 성공"));
+  }
+
+  @DeleteMapping("/api/room/{id}")
+  public ResponseEntity<?> deleteRoom(@LoginUser AuthUser user, @PathVariable("id") Long roomId){
+    roomService.deleteRoom(user.getUserId(), roomId);
+    return SuccessResponse.successWidthData(new MessageResponseDto("방 삭제 성공"));
   }
 }
