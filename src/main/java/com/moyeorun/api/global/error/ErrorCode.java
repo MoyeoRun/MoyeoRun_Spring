@@ -16,7 +16,7 @@ public enum ErrorCode {
   NICKNAME_DUPLICATE(110, "닉네임 중복됐습니다.", 400),
   SNS_USER_DUPLICATE(111, "이미 가입된 유저입니다.", 400),
 
-  ALREADY_PARTICIPATE_ROOM(120, "이미 참여된 방입니다.", 400),
+  ALREADY_PARTICIPATE_ROOM(120, "이미 다른 방에 참여중입니다.", 400),
   NOT_ALLOW_RESERVATION_REQUEST(121, "방 예약과 관련된 시간이 아닙니다.", 400),
   ALREADY_RESERVATION_ROOM(122, "이미 예약한 방입니다.", 400),
   REQUIRE_RESERVATION_ROOM(123, "예약된 유저가 아닙니다,", 400),
