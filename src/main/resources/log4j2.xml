@@ -66,6 +66,22 @@
                 </Delete>
             </DefaultRolloverstrategy>
         </RollingFile>
+
+        <RollingFile name="FatalAppender"
+                     fileName="../usr/share/moyeo-auth/log/fatal/fatal-${fileDate}.log"
+                     filePattern="../usr/share/moyeo-auth/backup/fatal/${FatalFileName}-%d{yyyy-MM-dd-HH}-%i.log">
+            <PatternLayout pattern="${fileLayout} %throwable{full}" />
+            <LevelRangeFilter minLevel="FATAL" maxLevel="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="6" />
+                <SizeBasedTriggeringPolicy size="128 MB" />
+            </Policies>
+            <DefaultRolloverstrategy max="40" fileIndex="max" >
+                <Delete basePath="../usr/share/moyeo-auth/backup/fatal" maxDepth="1">
+                    <IfLastModified age="10d" />
+                </Delete>
+            </DefaultRolloverstrategy>
+        </RollingFile>
     </Appenders>
 
     <Loggers>
