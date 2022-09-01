@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     skipPath.add("/api/auth/refresh");
     skipPath.add("/api/user/nickname/duplicate");
     skipPath.add("/api/dev/sign-in");
+    skipPath.add("/api/ws**");
     return skipPath.stream()
         .anyMatch(p -> pathMatcher.match(p, request.getRequestURI()));
   }

@@ -20,6 +20,7 @@ public class ErrorResponseBody {
 
   public ErrorResponseBody(ErrorCode errorCode) {
     this.errorCase = errorCode.getErrorCase();
+    this.message = errorCode.getMessage();
   }
 
   public ErrorResponseBody(ErrorCode errorCode, String message) {

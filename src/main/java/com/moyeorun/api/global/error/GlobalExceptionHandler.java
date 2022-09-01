@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moyeorun.api.global.common.response.ErrorResponseBody;
 import com.moyeorun.api.global.error.exception.BusinessException;
 import java.io.IOException;
+import javax.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -24,7 +25,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(BusinessException.class)
   protected ResponseEntity<?> handleBusinessException(BusinessException e) throws IOException {
     log.info(e.getMessage());
-
+    log.info(e.getErrorCode() + " " + e.getMessage());
     ErrorResponseBody errorResponseBody = new ErrorResponseBody(e.getErrorCode());
 
     return ResponseEntity.status(e.getErrorCode().getStatusCode())
@@ -34,6 +35,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(value = {MethodArgumentNotValidException.class,
       HttpMessageNotReadableException.class,
+      ConstraintViolationException.class
   })
   private ResponseEntity<?> handleMethodArgumentNotValidException(
       Exception e) throws IOException {
