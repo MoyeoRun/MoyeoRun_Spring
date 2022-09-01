@@ -15,6 +15,25 @@
     </Properties>
 
     <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${consoleLayout}" />
+        </Console>
+
+        <RollingFile name="InfoAppender"
+                     fileName="../usr/share/moyeo-auth/log/info/info-${fileDate}.log"
+                     filePattern="../usr/share/moyeo-auth/backup/info/${InfoFileName}-%d{yyyy-MM-dd-HH}-%i.log">
+            <PatternLayout pattern="${fileLayout}" />
+            <LevelRangeFilter minLevel="INFO" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="6" />
+                <SizeBasedTriggeringPolicy size="128 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="40" fileIndex="max" > <!-- 롤링 파일 10개 까지 생성 -->
+                <Delete basePath="../usr/share/moyeo-auth/backup/info" maxDepth="1">
+                    <IfLastModified age="10d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
     </Appenders>
 
     <Loggers>
