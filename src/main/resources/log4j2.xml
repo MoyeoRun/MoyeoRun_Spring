@@ -85,5 +85,18 @@
     </Appenders>
 
     <Loggers>
+        <!--        <logger name="org.springframework" level="INFO" additivity="false" >-->
+        <!--            <AppenderRef ref="console" />-->
+        <!--            <AppenderRef ref="InfoAppender" />-->
+        <!--        </logger>-->
+
+        <!-- ROOT logger-->
+        <Root level="INFO">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="InfoAppender"/>
+            <AppenderRef ref="ErrorAppender"/>
+            <AppenderRef ref="WarnAppender"/>
+            <AppenderRef ref="FatalAppender"/>
+        </Root>
     </Loggers>
 </Configuration>
