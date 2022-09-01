@@ -28,7 +28,7 @@
                 <TimeBasedTriggeringPolicy modulate="true" interval="6" />
                 <SizeBasedTriggeringPolicy size="128 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="40" fileIndex="max" > <!-- 롤링 파일 10개 까지 생성 -->
+            <DefaultRolloverStrategy max="40" fileIndex="max" >
                 <Delete basePath="../usr/share/moyeo-auth/backup/info" maxDepth="1">
                     <IfLastModified age="10d" />
                 </Delete>
