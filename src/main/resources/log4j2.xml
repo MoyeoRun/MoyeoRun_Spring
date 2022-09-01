@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="Info" >
     <Properties>
+        <Property name="logFileName">log4j2</Property>
+        <Property name="InfoFileName">info</Property>
+        <Property name="WarnFileName">warn</Property>
+        <Property name="ErrorFileName">error</Property>
+        <Property name="FatalFileName">fatal</Property>
+        <property name="fileDate">${date:yyyy-MM-dd}</property>
+        <Property name="consoleLayout">%style{%d{yyyy/MM/dd HH:mm:ss,SSS}}{cyan} %highlight{[%-5p]}{FATAL=bg_red, ERROR=red,
+            INFO=green, DEBUG=blue}  [%C] %style{[%t]}{yellow}- %m%n -</Property>
+        <Property name="fileLayout">[%t] %-5level %d %c(%M:%L) - %m%n</Property>
+        <!--        <Property name="consoleLayout">[%d{yyyy-MM-dd HH:mm:ss}] [%-5p] [%c{1}:%L] - %m%n</Property>-->
+        <!--        <Property name="fileLayout">%d [%t] %-5level %c(%M:%L) - %m%n</Property>-->
     </Properties>
 
     <Appenders>
