@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(BusinessException.class)
   protected ResponseEntity<?> handleBusinessException(BusinessException e) throws IOException {
     log.info(e.getMessage());
-
+    log.info(e.getErrorCode() + " " + e.getMessage());
     ErrorResponseBody errorResponseBody = new ErrorResponseBody(e.getErrorCode());
 
     return ResponseEntity.status(e.getErrorCode().getStatusCode())

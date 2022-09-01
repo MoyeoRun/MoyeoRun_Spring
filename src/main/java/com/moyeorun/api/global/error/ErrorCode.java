@@ -6,35 +6,27 @@ import lombok.Getter;
 public enum ErrorCode {
 
   //Common
-  INVALID_INPUT_VALUE(100, "invalid input value", 400),
-  AUTHENTICATION_FAIL(101, "authentication fail", 401),
-  AUTHORIZATION_FAIL(102, "authorization fail", 403),
-  ENTITY_NOT_FOUND(103, "entity not found", 404),
-  EXPIRED_JWT(104, "expired jwt", 401),
-  NOT_SIGN_IN_USER(105, "not sign in user request", 401),
-  ALREADY_PARTICIPATE_ROOM(106,"already participate room",400),
-  NOT_ALLOW_RESERVATION_REQUEST(107,"not allow reservation Request", 400),
-  ALREADY_RESERVATION_ROOM(108,"already reservation room",400),
-  REQUIRE_RESERVATION_ROOM(109, "not reservation room", 400),
-  NOT_ALLOW_HOST_USER_REQUEST(110, "host user not allow", 400),
-  NOT_ALLOW_JOIN_REQUEST(111,"not allow join Request", 400),
-  ALREADY_JOIN_ROOM(112,"already join room",400),
-  REQUIRE_JOIN_ROOM(113, "require join room",400),
-  LIMIT_ROOM_USER_COUNT(114,"limit user count", 400),
-  NOT_DELETE_ROOM_TIME(115,"시간제한으로 방 삭제 불가",400),
-  NOT_SUPPORT_METHOD(198, "not support method", 400),
-  INTERNAL_SERVER_ERROR(199, "internal server error", 500),
-  //idToken
-//  INVALID_IDTOKEN(110, "invalid idToken", 400),
-//  IDTOKEN_AUTHENTICATION_FAIL("005", "idToken authentication fail", 401),
+  INVALID_INPUT_VALUE(100, "요청 값이 잘못됐습니다.", 400),
+  AUTHENTICATION_FAIL(101, "인증이 실패했습니다.", 401),
+  AUTHORIZATION_FAIL(102, "권한이 없습니다.", 403),
+  ENTITY_NOT_FOUND(103, "해당 자원을 찾을 수 없습니다.", 404),
+  EXPIRED_JWT(104, "토큰 기간 만료", 401),
+  NOT_SIGN_IN_USER(105, "로그인이 필요합니다.", 401),
+  ALREADY_PARTICIPATE_ROOM(106, "이미 참여된 방입니다.", 400),
+  NOT_ALLOW_RESERVATION_REQUEST(107, "방 예약과 관련된 시간이 아닙니다.", 400),
+  ALREADY_RESERVATION_ROOM(108, "이미 예약한 방입니다.", 400),
+  REQUIRE_RESERVATION_ROOM(109, "예약된 유저가 아닙니다,", 400),
+  NOT_ALLOW_HOST_USER_REQUEST(110, "방장은 해당 요청을 보낼 수 없습니다.", 400),
+  NOT_ALLOW_JOIN_REQUEST(111, "방 참여와 관련된 시간이 아닙니다.", 400),
+  ALREADY_JOIN_ROOM(112, "이미 참여한 방입니다.", 400),
+  REQUIRE_JOIN_ROOM(113, "참여한 유저가 아닙니다.", 400),
+  LIMIT_ROOM_USER_COUNT(114, "방이 최대 인원입니다.", 400),
+  NOT_DELETE_ROOM_TIME(115, "방 삭제를 할 수 없는 시간입니다.", 400),
+  NOT_SUPPORT_METHOD(198, "지원히지 않는 메소드입니다.", 400),
+  INTERNAL_SERVER_ERROR(199, "서버 에러", 500),
 
-  //User  11X
-  NICKNAME_DUPLICATE(110, "duplicate nickname", 400),
-  SNS_USER_DUPLICATE(111, "duplicate sns user", 400);
-//  USER_NOT_FOUND(112, "user not found", 404);
-
-  //Jwt 104
-//  INVALID_JWT(113, "invalid jwt", 400),
+  NICKNAME_DUPLICATE(110, "닉네임 중복됐습니다.", 400),
+  SNS_USER_DUPLICATE(111, "이미 가입된 유저입니다.", 400);
 
 
   private final int errorCase;
