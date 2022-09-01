@@ -34,6 +34,38 @@
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
+
+        <RollingFile name="ErrorAppender"
+                     fileName="../usr/share/moyeo-auth/log/error/error-${fileDate}.log"
+                     filePattern="../usr/share/moyeo-auth/backup/error/${ErrorFileName}-%d{yyyy-MM-dd-HH}-%i.log">
+            <PatternLayout pattern="${fileLayout}" />
+            <LevelRangeFilter minLevel="ERROR" maxLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="6" />
+                <SizeBasedTriggeringPolicy size="128 MB" />
+            </Policies>
+            <DefaultRolloverstrategy max="40" fileIndex="max" >
+                <Delete basePath="../usr/share/moyeo-auth/backup/error" maxDepth="1">
+                    <IfLastModified age="10d" />
+                </Delete>
+            </DefaultRolloverstrategy>
+        </RollingFile>
+
+        <RollingFile name="WarnAppender"
+                     fileName="../usr/share/moyeo-auth/log/warn/warn-${fileDate}.log"
+                     filePattern="../usr/share/moyeo-auth/backup/warn/${WarnFileName}-%d{yyyy-MM-dd-HH}-%i.log">
+            <PatternLayout pattern="${fileLayout} %throwable{full}" />
+            <LevelRangeFilter minLevel="WARN" maxLevel="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="6" />
+                <SizeBasedTriggeringPolicy size="128 MB" />
+            </Policies>
+            <DefaultRolloverstrategy max="40" fileIndex="max" >
+                <Delete basePath="../usr/share/moyeo-auth/backup/warn" maxDepth="1">
+                    <IfLastModified age="10d" />
+                </Delete>
+            </DefaultRolloverstrategy>
+        </RollingFile>
     </Appenders>
 
     <Loggers>
